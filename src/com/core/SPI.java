@@ -70,14 +70,27 @@ public class SPI {
 		}
 	}
 	
-	public void getBufferData() {
+	public void getBufferOneData() {
 		
-		printBytes(readByte(0x66));
-		printBytes(readByte(0x67));
-		printBytes(readByte(0x68));
-		printBytes(readByte(0x69));
+		System.out.print(Integer.toHexString(readByte(0x66)[2]) + " ");
+		System.out.print(Integer.toHexString(readByte(0x67)[2]) + " ");
+		System.out.print(Integer.toHexString(readByte(0x68)[2]) + " ");
+		System.out.print(Integer.toHexString(readByte(0x69)[2]) + " ");
+		System.out.println();
 		
 	}
+	
+	public void getBufferTwoData() {
+		
+		System.out.print(Integer.toHexString(readByte(0x6A)[2]) + " ");
+		System.out.print(Integer.toHexString(readByte(0x6B)[2]) + " ");
+		System.out.print(Integer.toHexString(readByte(0x6C)[2]) + " ");
+		System.out.print(Integer.toHexString(readByte(0x6D)[2]) + " ");
+		System.out.println();
+		
+	}
+	
+	
 	
 	public byte[] send(int address, int b) {
 		
@@ -148,6 +161,78 @@ public class SPI {
 		}
 	}
 	
+	public void enable() {
+		
+		send(0x31, 0x11);
+		send(0x32, 0x00);
+		send(0x35, 0x04);
+		 
+		send(0x36, 0x0A);	
+		send(0x37, 0x0A);
+		send(0x38, 0x0A);
+		send(0x39, 0x0A);
+		
+		try {
+			spi.write((byte) 0x81);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void disable() {
+		
+		send(0x31, 0x11);
+		send(0x32, 0x00);
+		send(0x35, 0x04);
+		 
+		send(0x36, 0x17);	
+		send(0x37, 0x17);
+		send(0x38, 0x17);
+		send(0x39, 0x17);
+		
+		try {
+			spi.write((byte) 0x81);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void getStatus() {
+		
+		send(0x31, 0x11);
+		send(0x32, 0x00);
+		send(0x35, 0x04);
+		 
+		send(0x36, 0x01);	
+		send(0x37, 0x01);
+		send(0x38, 0x01);
+		send(0x39, 0x01);
+		
+		try {
+			spi.write((byte) 0x81);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void getBikeID() {
+		
+		send(0x31, 0x11);
+		send(0x32, 0x00);
+		send(0x35, 0x04);
+		 
+		send(0x36, 0x08);	
+		send(0x37, 0x08);
+		send(0x38, 0x08);
+		send(0x39, 0x08);
+		
+		try {
+			spi.write((byte) 0x81);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String [] args) {
 		
 		SpiDevice s = null;
@@ -164,29 +249,23 @@ public class SPI {
 		spi.init();
 		spi.clearBuffers();
 		
+		spi.lock();
+		
 		while(true) {
 			
-			/*spi.ack();
-			spi.getBufferData();
-			spi.clearBuffers();*/
-			
-			spi.unlock();
-			
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
-			spi.lock();
+			spi.getBikeID();
+			spi.getBufferOneData();
+			spi.getBufferTwoData();
+			spi.clearBuffers();
 			
 			try {
 				Thread.sleep(2000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		
-			System.out.println("END");
+			
+			System.out.println("BIKE ID");
+			
 		}
 		
 	}

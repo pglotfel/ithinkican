@@ -1,6 +1,6 @@
 #~/git/base_workspace/ithinkican/BUILD
 java_binary(
-        name = "my-runner",
+        name = "ithinkican",
         srcs = glob(["**/*.java"]),
         main_class = "com.core.SPI",
 	deps = [":pi4j"]
