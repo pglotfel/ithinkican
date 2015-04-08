@@ -1,6 +1,6 @@
-package com.core;
+package ithinkican.core;
 
-public interface IProtocol {
+public interface IDriver {
 
 	//Messages that can be sent
 	
@@ -12,6 +12,7 @@ public interface IProtocol {
 	public void disable();
 	public void getBikeID();
 	
-	//Receive a message
+	//Message actions
 	public byte[] getMessage();
+	public int getQueueSize();
 }

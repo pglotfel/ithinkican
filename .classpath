@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/junit.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-core.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-core-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-core-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-device.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-device-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-device-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-example.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-example-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-example-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-gpio-extension.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-gpio-extension-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-gpio-extension-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-service.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-service-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Paul/libraries/pi4j-1.0-RC/lib/pi4j-service-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

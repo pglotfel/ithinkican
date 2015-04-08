@@ -1,4 +1,4 @@
-package com.core;
+package ithinkican.MCP2515;
 
 public class MCP2515Messages {
 	

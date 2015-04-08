@@ -1,4 +1,8 @@
-package com.core;
+package ithinkican.MCP2515;
+
+import ithinkican.core.IDriver;
+import ithinkican.core.SPIChannel;
+import ithinkican.core.SPIMode;
 
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,7 +19,7 @@ import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
 import com.pi4j.io.spi.SpiMode;
 
-public class MCP2515 implements IProtocol {
+public class MCP2515 implements IDriver {
 	
 	private SpiDevice driver;
 	private LinkedBlockingQueue<byte[]> queue;
@@ -159,5 +163,11 @@ public class MCP2515 implements IProtocol {
 			e.printStackTrace();
 		}
 		return ret;
+	}
+
+	@Override
+	public int getQueueSize() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
