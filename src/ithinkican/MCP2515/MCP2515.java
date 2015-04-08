@@ -38,7 +38,7 @@ public class MCP2515 implements IDriver {
 		
 		messageInterrupt.addListener(new GpioPinListenerDigital() {
 	    	  
-			//Add message to queue...
+			//TODO: Add message to queue...
 	    	  
 			@Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
@@ -159,7 +159,6 @@ public class MCP2515 implements IDriver {
 		try {
 			ret = queue.take();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return ret;
@@ -167,7 +166,7 @@ public class MCP2515 implements IDriver {
 
 	@Override
 	public int getQueueSize() {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		return queue.size();
 	}
 }
