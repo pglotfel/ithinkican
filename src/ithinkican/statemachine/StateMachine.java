@@ -29,6 +29,9 @@ public class StateMachine<T> {
 	}
 	
 	public static void main(String[] args) {
+		
+		//Put this in a test!
+		
 		StateMachine<String> sm = new StateMachine<String>();
 		sm.addState(new State<String, String>("Hello", str -> {System.out.println(str); return "Hello";}));
 		sm.setInitialState("Hello");

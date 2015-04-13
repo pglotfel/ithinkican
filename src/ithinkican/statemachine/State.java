@@ -24,7 +24,7 @@ public class State<R, T> {
 		
 		/*
 		 *Example showing use of functions!  Awesome! 
-		 * 
+		 * Also, put this in a test!
 		 */
 		
 		State<String, String> s = new State<String, String>("Test state", (String str) -> {System.out.println(str); return str;});
