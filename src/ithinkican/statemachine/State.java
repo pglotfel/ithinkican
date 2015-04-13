@@ -1,20 +1,35 @@
 package ithinkican.statemachine;
 
-public class State<T> {
+import java.util.function.Function;
+
+public class State<R, T> {
 	
-	private String identifier;
-	private Callable<String, T> action;
+	private R identifier;
+	private Function<T, String> func;
 	
-	public State(String identifier, Callable<String, T> action) {
+	public State(R identifier, Function<T, String> func) {
 		this.identifier = identifier;
-		this.action = action;	
+		this.func = func;
 	}
-	
-	public String getIdentifier() {
+
+	public R getIdentifier() {
 		return identifier;
 	}
 	
-	public String advance(Object o) {
-		return action.call((T) o);
+	public String advance(Object value) {
+		return func.apply((T) value);
+	}
+	
+	public static void main (String [] args) {
+		
+		/*
+		 *Example showing use of functions!  Awesome! 
+		 * 
+		 */
+		
+		State<String, String> s = new State<String, String>("Test state", (String str) -> {System.out.println(str); return str;});
+		
+		s.advance("hello");
+		
 	}
 }
