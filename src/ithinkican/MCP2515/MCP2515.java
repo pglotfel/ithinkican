@@ -38,12 +38,13 @@ public class MCP2515 implements IDriver {
 		
 		messageInterrupt.addListener(new GpioPinListenerDigital() {
 	    	  
-			//TODO: Add message to queue...
+
 	    	  
 			@Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
 				// display pin state on console
                 System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
+    			//TODO: Add message to queue...
             }
         });
         		

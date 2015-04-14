@@ -1,8 +1,9 @@
 package ithinkican.statemachine;
 
 import java.util.HashMap;
+import java.util.function.Consumer;
 
-public class StateMachine<T> {
+public class StateMachine<T> implements Consumer<T> {
 	
 	private HashMap<T, State<T, ?>> states;
 	private State<T, ?> currentState;
@@ -12,31 +13,42 @@ public class StateMachine<T> {
 		currentState = null;
 	}
 	
-	public void addState(State<T, ?> state) {
+	public StateMachine<T> addState(State<T, ?> state) {
 		states.put(state.getIdentifier(), state);
+		return this;
 	}
 	
 	public void setInitialState(String state) {
 		currentState = states.get(state);
 	}
 	
-	public void inject(Object o) {
-		currentState = states.get(currentState.advance(o));
-	}
-	
 	public State<T, ?> getCurrentState() {
 		return currentState;
 	}
 	
-	public static void main(String[] args) {
+	@Override
+	public void accept(Object arg) {
+		currentState = states.get(currentState.advance(arg));		
+	}
+	
+	public static void main (String [] args) {
+		//Make states
+		State<String, String> hi = new State<String, String>("hi", str -> {System.out.println("hi"); return "bye";});
+		State<String,String> bye = new State<String, String>("bye", str -> {System.out.println("bye"); return "hi";});
 		
-		//Put this in a test!
+		//Add states
 		
 		StateMachine<String> sm = new StateMachine<String>();
-		sm.addState(new State<String, String>("Hello", str -> {System.out.println(str); return "Hello";}));
-		sm.setInitialState("Hello");
-		sm.inject("hi");
-		sm.inject("yo");
-		System.out.println(sm.getCurrentState().getIdentifier());
+		sm.addState(hi)
+		  .addState(bye);
+		sm.setInitialState("hi");
+		
+		//Run state machine
+		
+		String s = "yo";
+		
+		sm.accept(s);
+		sm.accept(s);
+		sm.accept(s);
 	}
 }
