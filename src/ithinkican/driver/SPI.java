@@ -1,4 +1,4 @@
-package ithinkican.core;
+package ithinkican.driver;
 
 import java.io.IOException;
 import com.pi4j.io.spi.SpiChannel;

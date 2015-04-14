@@ -1,6 +1,6 @@
 package ithinkican.fake;
 
-import ithinkican.core.IDriver;
+import ithinkican.driver.IDriver;
 
 import java.util.concurrent.LinkedBlockingQueue;
 

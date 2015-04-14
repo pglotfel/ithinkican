@@ -1,7 +1,8 @@
 package ithinkican.test;
 
-import ithinkican.core.IDriver;
+import ithinkican.driver.IDriver;
 import ithinkican.fake.FakeCAN;
+
 import org.junit.Before;
 import org.junit.Test;
 

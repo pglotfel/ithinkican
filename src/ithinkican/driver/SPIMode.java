@@ -1,4 +1,4 @@
-package ithinkican.core;
+package ithinkican.driver;
 
 public enum SPIMode {
 	

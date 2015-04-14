@@ -1,8 +1,8 @@
 package ithinkican.MCP2515;
 
-import ithinkican.core.IDriver;
-import ithinkican.core.SPIChannel;
-import ithinkican.core.SPIMode;
+import ithinkican.driver.IDriver;
+import ithinkican.driver.SPIChannel;
+import ithinkican.driver.SPIMode;
 
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
