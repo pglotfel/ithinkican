@@ -18,7 +18,7 @@ public class StateMachine<T> implements Consumer<T> {
 		return this;
 	}
 	
-	public void setInitialState(String state) {
+	public void setInitialState(T state) {
 		currentState = states.get(state);
 	}
 	

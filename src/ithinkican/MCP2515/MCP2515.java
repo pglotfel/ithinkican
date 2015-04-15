@@ -36,9 +36,7 @@ public class MCP2515 implements IDriver {
 		
 		queue = new LinkedBlockingQueue<byte[]>();
 		
-		messageInterrupt.addListener(new GpioPinListenerDigital() {
-	    	  
-
+		messageInterrupt.addListener(new GpioPinListenerDigital() {	    	 
 	    	  
 			@Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
