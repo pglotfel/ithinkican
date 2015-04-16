@@ -3,7 +3,7 @@ package ithinkican.core;
 import ithinkican.MCP2515.MCP2515;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
-import ithinkican.statemachine.State;
+import ithinkican.statemachine.Process;
 import ithinkican.statemachine.StateMachine;
 
 import java.io.IOException;
@@ -16,9 +16,9 @@ public class Main {
 		
 		StateMachine<String> system = new StateMachine<String>();
 		
-		State<String, String> ack = new State<String, String>("ack", str -> {System.out.println("acking!"); driver.ack(); return "sleep";});
+		Process<String, String> ack = new Process<String, String>("ack", str -> {System.out.println("acking!"); driver.ack(); return "sleep";});
 		
-		State<String, String> sleep = new State<String, String>("sleep", str -> {try {
+		Process<String, String> sleep = new Process<String, String>("sleep", str -> {try {
 																						Thread.sleep(1000);
 																					} catch (Exception e) {
 																						// TODO Auto-generated catch block

@@ -1,6 +1,7 @@
 package ithinkican.test;
 
-import ithinkican.statemachine.State;
+import ithinkican.statemachine.Auto;
+import ithinkican.statemachine.Process;
 import ithinkican.statemachine.StateMachine;
 
 import java.util.Random;
@@ -18,8 +19,8 @@ public class StateMachineTest {
 		sm = new StateMachine<String>();
 		
 		//Make states
-		State<String, String> hi = new State<String, String>("hi", str -> {return "bye";});
-		State<String,String> bye = new State<String, String>("bye", str -> {return "hi";});
+		Process<String, String> hi = new Process<String, String>("hi", str -> {return "bye";});
+		Process<String,String> bye = new Process<String, String>("bye", str -> {return "hi";});
 		
 		//Add states
 		
@@ -48,5 +49,24 @@ public class StateMachineTest {
 		} else {
 			assert(sm.getCurrentState().getIdentifier() == "bye");
 		}		
+	}
+	
+	@Test 
+	public void autoTest() {
+		
+		StateMachine<String> sm = new StateMachine<String>();
+		
+		Process<String, String> p = new Process<String,String>("init", str -> {System.out.println("init"); return "auto";});
+		
+		Auto<String> a = new Auto<String>("auto", (Void v) -> {System.out.println("auto"); return "init";});
+		
+		sm.addState(p)
+		.addState(a);
+		
+		sm.setInitialState("init");
+		
+		sm.accept("hello");
+		
+		assert(sm.getCurrentState().getIdentifier() == "init");
 	}
 }
