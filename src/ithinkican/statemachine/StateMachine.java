@@ -35,6 +35,6 @@ public class StateMachine<T> implements Consumer<T> {
 			result = states.get(result.apply(null));
 		}
 		
-		currentState = states.get(currentState.apply(arg));		
+		currentState = result;
 	}
 }
