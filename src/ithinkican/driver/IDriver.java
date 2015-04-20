@@ -11,6 +11,9 @@ public interface IDriver {
 	public void enable();
 	public void disable();
 	public void getBikeID();
+	public void initialize();
+	public void reset();
+	public void readyToSend();
 	
 	//Message actions
 	public byte[] getMessage();

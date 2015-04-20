@@ -69,4 +69,22 @@ public class FakeCAN implements IDriver {
 	public int getQueueSize() {
 		return queue.size();
 	}
+
+	@Override
+	public void initialize() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void readyToSend() {
+		// TODO Auto-generated method stub
+		
+	}
 }

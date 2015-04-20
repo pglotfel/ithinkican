@@ -31,20 +31,34 @@ public class SPI {
 	
 	public void init() {
 		
-		byte [] src = {(byte) 0x05, (byte) 0x60, (byte) 0x60, (byte) 0xFF};
-		try {
-			spi.write(src);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		byte [] src = {(byte) 0x05, (byte) 0x60, (byte) 0x60, (byte) 0xFF};
+//		try {
+//			spi.write(src);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		
+//		this.send(0x0F,  0x00);
+//		
+//		byte[] src2 = {(byte) 0x05, (byte) 0x2B, (byte) 0x03, (byte) 0xFF};
+//		try {
+//			spi.write(src2);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 		
-		this.send(0x0F,  0x00);
+		final byte[][] initialize = {
+				{0x05, 0x60, 0x60, (byte) 0xFF},
+				{0x02, 0x0F, 0x00}, 
+				{0x05, 0x2B, 0x03, (byte) 0xFF}
+			};
 		
-		byte[] src2 = {(byte) 0x05, (byte) 0x2B, (byte) 0x03, (byte) 0xFF};
-		try {
-			spi.write(src2);
-		} catch (IOException e) {
-			e.printStackTrace();
+		for(int i = 0; i < initialize.length; i++) {
+			try {
+				spi.write(initialize[i]);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -111,18 +125,39 @@ public class SPI {
 	
 	public void ack() {
 		
-		send(0x31, 0x11);
-		send(0x32, 0x00);
-		send(0x35, 0x04);
-		 
-		send(0x36, 0x03);
-		send(0x37, 0x03);
-		send(0x38, 0x03);
-		send(0x39, 0x03);
+//		send(0x31, 0x11);
+//		send(0x32, 0x00);
+//		send(0x35, 0x04);
+//		 
+//		send(0x36, 0x03);
+//		send(0x37, 0x03);
+//		send(0x38, 0x03);
+//		send(0x39, 0x03);
+//		
+//		try {
+//			spi.write((byte) 0x81);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		
+		final byte[][] ack = {
+				
+				{0x02, 0x31, 0x11}, 
+				{0x02, 0x32, 0x00}, 
+				{0x02, 0x35, 0x04},
+				{0x02, 0x36, 0x03}, 
+				{0x02, 0x37, 0x03},
+				{0x02, 0x38, 0x03},
+				{0x02, 0x39, 0x03},
+				{(byte) 0x81}
+				};
 		
 		try {
-			spi.write((byte) 0x81);
+			for(int i = 0; i < ack.length; i++) {
+				spi.write(ack[i]);
+			}
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

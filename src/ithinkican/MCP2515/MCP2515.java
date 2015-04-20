@@ -77,7 +77,9 @@ public class MCP2515 implements IDriver {
 	public void ack() {
 		
 		try {
-			driver.write(MCP2515Messages.ack);
+			for(int i = 0; i < MCP2515Messages.ack.length; i++) {
+				driver.write(MCP2515Messages.ack[i]);
+			}
 		} catch (IOException e) {
 			//TODO: Elevate the exception
 			e.printStackTrace();
@@ -88,7 +90,9 @@ public class MCP2515 implements IDriver {
 	public void getStatus() {
 		
 		try {
-			driver.write(MCP2515Messages.getStatus);
+			for(int i = 0; i < MCP2515Messages.getStatus.length; i++) {
+				driver.write(MCP2515Messages.getStatus[i]);
+			}
 		} catch (IOException e) {
 			//TODO: Elevate the exception
 			e.printStackTrace();
@@ -99,7 +103,9 @@ public class MCP2515 implements IDriver {
 	public void unlock() {
 		
 		try {
-			driver.write(MCP2515Messages.unlock);
+			for(int i = 0; i < MCP2515Messages.unlock.length; i++) {
+				driver.write(MCP2515Messages.unlock[i]);
+			}
 		} catch (IOException e) {
 			//TODO: Elevate the exception
 			e.printStackTrace();
@@ -110,7 +116,9 @@ public class MCP2515 implements IDriver {
 	public void lock() {
 		
 		try {
-			driver.write(MCP2515Messages.lock);
+			for(int i = 0; i < MCP2515Messages.lock.length; i++) {
+				driver.write(MCP2515Messages.lock[i]);
+			}
 		} catch (IOException e) {
 			//TODO: Elevate the exception
 			e.printStackTrace();
@@ -121,7 +129,9 @@ public class MCP2515 implements IDriver {
 	public void enable() {
 		
 		try {
-			driver.write(MCP2515Messages.enable);
+			for(int i = 0; i < MCP2515Messages.enable.length; i++) {
+				driver.write(MCP2515Messages.enable[i]);
+			}
 		} catch (IOException e) {
 			//TODO: Elevate the exception
 			e.printStackTrace();
@@ -132,7 +142,9 @@ public class MCP2515 implements IDriver {
 	public void disable() {
 		
 		try {
-			driver.write(MCP2515Messages.disable);
+			for(int i = 0; i < MCP2515Messages.disable.length; i++) {
+				driver.write(MCP2515Messages.disable[i]);
+			}
 		} catch (IOException e) {
 			//TODO: Elevate the exception
 			e.printStackTrace();
@@ -143,7 +155,9 @@ public class MCP2515 implements IDriver {
 	public void getBikeID() {
 		
 		try {
-			driver.write(MCP2515Messages.getBikeID);
+			for(int i = 0; i < MCP2515Messages.getBikeID.length; i++) {
+				driver.write(MCP2515Messages.getBikeID[i]);
+			}
 		} catch (IOException e) {
 			//TODO: Elevate the exception
 			e.printStackTrace();
@@ -167,5 +181,41 @@ public class MCP2515 implements IDriver {
 	public int getQueueSize() {
 		
 		return queue.size();
+	}
+
+	@Override
+	public void initialize() {
+		
+		try {
+			for(int i = 0; i < MCP2515Messages.initialize.length; i++) {
+				driver.write(MCP2515Messages.initialize[i]);
+			}
+		} catch (IOException e) {
+			//TODO: Elevate the exception
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void reset() {
+		
+		try {
+			driver.write(MCP2515Messages.reset);
+		} catch (IOException e) {
+			//TODO: Elevate the exception
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void readyToSend() {
+		try {
+			for(int i = 0; i < MCP2515Messages.readyToSend.length; i++) {
+				driver.write(MCP2515Messages.readyToSend[i]);
+			}
+		} catch (IOException e) {
+			//TODO: Elevate the exception
+			e.printStackTrace();
+		}		
 	}
 }
