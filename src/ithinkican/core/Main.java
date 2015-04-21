@@ -25,26 +25,20 @@ public class Main {
 	    
 	    driver.initialize();
 		
-//		SpiDevice s = null;
-//		
-//		try {
-//			s = SpiFactory.getInstance(SpiChannel.CS0, 10000000, SpiMode.MODE_0);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		
-//		SPI driver = new SPI(s);
-//		
-//		driver.reset();
-//		driver.init();
-//		driver.clearBuffers();
-		
 		StateMachine<String> system = new StateMachine<String>();
 		
 		Process<String, String> ack = new Process<String, String>("ack", str -> {System.out.println("acking!"); 
 																				 driver.ack(); 
-																				 driver.readyToSend();
-																				 return "sleep";});
+																				 return "rts";});
+		
+		Auto<String> rts = new Auto<String>("rts", n -> {try {
+																  Thread.sleep(1000);
+															 } catch (Exception e) {																						
+																	e.printStackTrace();
+															 } 
+		                                                     System.out.println("RTS");
+		                                                     driver.readyToSend();
+															 return "sleep";});
 		
 		Auto<String> sleep = new Auto<String>("sleep", n -> {try {
 																	Thread.sleep(1000);
@@ -54,7 +48,8 @@ public class Main {
 															return "ack";});
 		
 		system.addState(ack)
-			.addState(sleep);
+			.addState(sleep)
+			.addState(rts);
 		
 		system.setInitialState("ack");
 		

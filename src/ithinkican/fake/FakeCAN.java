@@ -51,25 +51,7 @@ public class FakeCAN implements IDriver {
 			e.printStackTrace();
 		}	
 	}
-
-	@Override
-	public byte[] getMessage() {
-		byte[] ret = null;
-		
-		try {
-			ret = queue.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return ret;
-	}
-
-	@Override
-	public int getQueueSize() {
-		return queue.size();
-	}
-
+	
 	@Override
 	public void initialize() {
 		// TODO Auto-generated method stub

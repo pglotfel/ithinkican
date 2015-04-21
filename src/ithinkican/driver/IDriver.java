@@ -14,8 +14,4 @@ public interface IDriver {
 	public void initialize();
 	public void reset();
 	public void readyToSend();
-	
-	//Message actions
-	public byte[] getMessage();
-	public int getQueueSize();
 }

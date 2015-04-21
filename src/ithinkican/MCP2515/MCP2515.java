@@ -1,9 +1,11 @@
 package ithinkican.MCP2515;
 
+import ithinkican.driver.IConducer;
 import ithinkican.driver.IDriver;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
 
+import java.awt.Event;
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -11,6 +13,7 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
@@ -19,22 +22,24 @@ import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
 import com.pi4j.io.spi.SpiMode;
 
-public class MCP2515 implements IDriver {
+public class MCP2515 implements IDriver, IConducer<Byte[], Byte[]> {
 	
 	private SpiDevice driver;
-	private LinkedBlockingQueue<byte[]> queue;
+	private LinkedBlockingQueue<Byte[]> in;
+	private LinkedBlockingQueue<Byte[]> out;
 	
     private final GpioController gpio = GpioFactory.getInstance();
 
     // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
-    private final GpioPinDigitalInput messageInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_25, PinPullResistance.PULL_DOWN);   
+    private final GpioPinDigitalInput messageInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_29);   
 	
 	public MCP2515(SPIChannel channel, SPIMode mode, int speed) throws IOException {
 		
 		SpiChannel c = null;
 		SpiMode m = null;
 		
-		queue = new LinkedBlockingQueue<byte[]>();
+		in = new LinkedBlockingQueue<Byte[]>();
+		out = new LinkedBlockingQueue<Byte[]>();
 		
 		messageInterrupt.addListener(new GpioPinListenerDigital() {	    	 
 	    	  
@@ -43,6 +48,13 @@ public class MCP2515 implements IDriver {
 				// display pin state on console
                 System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
     			//TODO: Add message to queue...
+                
+                if(event.getState() == PinState.LOW) {
+                	//Message is in RX0
+                	System.out.println("Clearing buffer zero...");                	
+                	clearBufferOne();     
+                	System.out.println(Integer.toHexString(readByte(0x2C)[2]));
+                }
             }
         });
         		
@@ -165,25 +177,6 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public byte[] getMessage() {
-		
-		byte[] ret = null;
-		
-		try {
-			ret = queue.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return ret;
-	}
-
-	@Override
-	public int getQueueSize() {
-		
-		return queue.size();
-	}
-
-	@Override
 	public void initialize() {
 		
 		try {
@@ -217,5 +210,78 @@ public class MCP2515 implements IDriver {
 			//TODO: Elevate the exception
 			e.printStackTrace();
 		}		
+	}
+
+	@Override
+	public int getQueueSize() {
+		
+		return in.size();
+	}
+
+	@Override
+	public boolean accept(Byte[] b) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Byte[] receive() {
+		
+		Byte[] ret = null;
+		
+		try {
+			ret = in.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return ret;
+	}
+	
+	
+	//NOT CURRENT IN AN INTERFACE
+	public byte[] readByte(int address) {
+		
+		byte[] msg = {(byte) 0x03, (byte) address, (byte) 0xDF};
+		byte [] bs = null;
+		
+		try {
+			bs = driver.write(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return bs;
+	}
+	
+	public void clearBufferOne() {
+		
+		byte [] msg = {0x05, 0x2C, (byte) 0xFF, 0x00};
+		
+		try {
+			driver.write(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void clearBufferTwo() {
+		
+		byte [] msg = {(byte) 0x05, (byte) 0x2C, (byte) 0x02, (byte) 0x00};
+		
+		try {
+			driver.write(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void getBufferOneData() {
+		
+		Byte[] b = new Byte[4];
+		
+		b[0] = readByte(0x66)[2];
+		b[1] = readByte(0x67)[2];
+		b[2] = readByte(0x68)[2];
+		b[3] = readByte(0x69)[2];	
 	}
 }
