@@ -103,7 +103,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	}
 
 	@Override
-	public Byte[] recieve(int timeout) {
+	public Byte[] receive(int timeout) {
 		
 		Byte[] ret = null;
 		

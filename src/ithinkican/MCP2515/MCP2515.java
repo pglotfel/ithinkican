@@ -7,7 +7,6 @@ import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 import com.pi4j.io.gpio.GpioController;
@@ -26,10 +25,11 @@ public class MCP2515 implements IDriver {
 	
 	private SpiDevice driver;
 	
-    private final GpioController gpio = GpioFactory.getInstance();
+    private GpioController gpio = GpioFactory.getInstance();
 
     // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
-    private final GpioPinDigitalInput messageInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_29);   
+    public GpioPinDigitalInput bufferZeroInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_29);  
+    public GpioPinDigitalInput bufferOneInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_27);  
     
     private NetworkManager manager;
 	
@@ -37,26 +37,8 @@ public class MCP2515 implements IDriver {
 		
 		SpiChannel c = null;
 		SpiMode m = null;
-		
+
 		this.manager = manager;
-		
-		messageInterrupt.addListener(new GpioPinListenerDigital() {	    	 
-	    	  
-			@Override
-            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-				// display pin state on console
-                System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
-    			//TODO: Add message to queue...
-                
-                if(event.getState() == PinState.LOW) {
-                	//Message is in RX0
-                	System.out.println("Clearing buffer zero...");                	
-                	clearBufferOne();     
-                	System.out.println(Integer.toHexString(readByte(0x2C)[2]));
-                	manager.submitRead(read());
-                }
-            }
-        });
         		
 		switch(channel) {
 			case CE0:
@@ -83,17 +65,167 @@ public class MCP2515 implements IDriver {
 		}
 				
 		driver = SpiFactory.getInstance(c, speed, m);
-		
-		//Set up threading 
 	}
 	
-	public Supplier<Byte[]> read() {
+	public void start() {
+		
+		bufferZeroInterrupt.addListener(new GpioPinListenerDigital() {	    	 
+	    	  
+			@Override
+            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+				// display pin state on console
+                
+				System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
+                
+                if(event.getState() == PinState.LOW) {
+                	
+                	//Message is in RX0
+                	manager.submitRead(readBufferZero());
+                }
+            }
+        });
+		
+		bufferOneInterrupt.addListener(new GpioPinListenerDigital() {	    	 
+	    	  
+			@Override
+            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+				// display pin state on console
+                
+				System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
+				
+                if(event.getState() == PinState.LOW) {
+                	
+                	//Message is in RX0
+                	manager.submitRead(readBufferOne());
+                }
+            }
+        });
+	}
+	
+//	public Supplier<Byte[]> readBufferZero() {
+//		
+//		Supplier<Byte[]> supplier = new Supplier<Byte[]>() {
+//
+//			@Override
+//			public Byte[] get() {           	 
+//            	
+//            	int b0 = (readByte(0x65)[2] & 0x0F);
+//            	
+//            	//Ensure that we only get 8 bytes...
+//            	
+//            	if(b0 > 8) {
+//            		b0 = 8;
+//            	}
+//            	            	
+//            	Byte[] b = new Byte[b0];
+//        		
+//            	for(int i = 0; i < b0; i++) {         		
+//            		b[i] = readByte((102 + i) & 0xFF)[2];
+//            	}
+//	            	
+//            	clearBufferZero();   
+//            	
+//            	System.out.println("Clearing buffer 0");
+//        		
+//				return b;
+//			}			
+//		};
+//		
+//		return supplier;
+//	}
+	
+	public Supplier<Byte[]> readBufferZero() {
 		
 		Supplier<Byte[]> supplier = new Supplier<Byte[]>() {
 
 			@Override
-			public Byte[] get() {
-				return new Byte[1];
+			public Byte[] get() {           	 
+            	
+            	byte[] src = {(byte) 0x92, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+            	
+            	            	
+            	byte[] b = new byte[9];
+        		
+            	try {
+					b = driver.write(src);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+            	//clearBufferZero();   
+            	
+            	Byte[] buf = new Byte[8];
+            	for(int i = 1; i <= 8; i++) {
+            		buf[i-1] = b[i];
+            	}
+        		
+				return buf;
+			}			
+		};
+		
+		return supplier;
+	}
+	
+//	public Supplier<Byte[]> readBufferOne() {
+//		
+//		Supplier<Byte[]> supplier = new Supplier<Byte[]>() {
+//
+//			@Override
+//			public Byte[] get() {           	 
+//            	
+//            	int b1 = (readByte(0x75)[2] & 0x0F);
+//            	
+//            	//Ensure that we only get 8 bytes...
+//            	
+//            	if(b1 > 8) {
+//            		b1 = 8;
+//            	}
+//            	            	
+//            	Byte[] b = new Byte[b1];
+//        		
+//            	for(int i = 0; i < b1; i++) {         		
+//            		b[i] = readByte((117 + i) & 0xFF)[2];
+//            	}
+//	            	
+//            	clearBufferOne();   
+//            	
+//            	System.out.println("Clearing buffer 1");
+//        		
+//				return b;
+//			}			
+//		};
+//		
+//		return supplier;
+//	}
+	
+	public Supplier<Byte[]> readBufferOne() {
+		
+		Supplier<Byte[]> supplier = new Supplier<Byte[]>() {
+
+			@Override
+			public Byte[] get() {           	 
+            	
+            	byte[] src = {(byte) 0x96, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+            	
+            	            	
+            	byte[] b = new byte[9];
+        		
+            	try {
+					b = driver.write(src);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+            	//clearBufferZero();   
+            	
+            	Byte[] buf = new Byte[8];
+            	for(int i = 1; i <= 8; i++) {
+            		buf[i-1] = b[i];
+            	}
+        		
+				return buf;
 			}			
 		};
 		
@@ -318,6 +450,7 @@ public class MCP2515 implements IDriver {
 	public byte[] readByte(int address) {
 		
 		byte[] msg = {(byte) 0x03, (byte) address, (byte) 0xDF};
+		
 		byte [] bs = null;
 		
 		try {
@@ -328,9 +461,9 @@ public class MCP2515 implements IDriver {
 		return bs;
 	}
 	
-	public void clearBufferOne() {
+	public void clearBufferZero() {
 		
-		byte [] msg = {0x05, 0x2C, (byte) 0xFF, 0x00};
+		byte [] msg = {0x05, 0x2C, (byte) 0x01, 0x00};
 		
 		try {
 			driver.write(msg);
@@ -339,7 +472,7 @@ public class MCP2515 implements IDriver {
 		}
 	}
 	
-	public void clearBufferTwo() {
+	public void clearBufferOne() {
 		
 		byte [] msg = {(byte) 0x05, (byte) 0x2C, (byte) 0x02, (byte) 0x00};
 		
@@ -348,15 +481,5 @@ public class MCP2515 implements IDriver {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public void getBufferOneData() {
-		
-		Byte[] b = new Byte[4];
-		
-		b[0] = readByte(0x66)[2];
-		b[1] = readByte(0x67)[2];
-		b[2] = readByte(0x68)[2];
-		b[3] = readByte(0x69)[2];	
 	}
 }

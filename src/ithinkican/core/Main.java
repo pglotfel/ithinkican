@@ -20,24 +20,57 @@ import com.pi4j.io.spi.SpiMode;
 
 public class Main {
 	
+	public static void print(Byte[] b) {
+		
+		if(b != null) {
+			System.out.print("MESSAGE: ");
+			for(int i = 0; i < b.length; i++) {
+				System.out.print(Integer.toHexString(b[i]) + ", ");
+			}
+			System.out.println();
+		} else {
+			System.out.println("NOTHING");
+		}
+	} 
+	
 	public static void main(String[] args) throws IOException {
 		
-		final ExecutorService executor = Executors.newSingleThreadExecutor();
+		ExecutorService executor = Executors.newSingleThreadExecutor();
 		
-		final NetworkManager network = new NetworkManager(executor);
+		NetworkManager network = new NetworkManager(executor);
 		
-	    final MCP2515 driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);
+	    MCP2515 driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);	      
+        
+
 	    
-	    network.submitWrite(driver.reset());
+	    driver.reset().call();    
 	    
-	    network.submitWrite(driver.initialize());	    
+	    //Attach interrupts after reset
+   	 
+	    driver.start();
 	    
-	    network.start();
-		
+	    //Initialize controller before starting network
+	    
+	    driver.initialize().call();	    
+	        
+	    network.start();    
+	    
+	    //Attempt to clear out buffers.  Completely arbitrary
+	    
+        print(network.receive(1000));
+        print(network.receive(1000));      
+        
+        try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		StateMachine<String> system = new StateMachine<String>();
 		
-		Process<String, String> ack = new Process<String, String>("ack", str -> {System.out.println("acking!"); 
-																				 network.submitWrite(driver.ack()); 
+		Process<String, String> ack = new Process<String, String>("ack", str -> {//System.out.println("acking!"); 
+																				 //network.submitWrite(driver.ack()); 
 																				 return "rts";});
 		
 		Auto<String> rts = new Auto<String>("rts", n -> {try {
@@ -47,6 +80,8 @@ public class Main {
 															 } 
 		                                                     System.out.println("RTS");
 		                                                     network.submitWrite(driver.readyToSend());
+		                                                     print(network.receive(1000));
+		                                                     print(network.receive(1000));
 															 return "sleep";});
 		
 		Auto<String> sleep = new Auto<String>("sleep", n -> {try {
@@ -63,7 +98,6 @@ public class Main {
 		system.setInitialState("ack");
 		
 		while(true) {
-			System.out.println("System cycled!");
 			system.accept("arg");
 		}
 	}
