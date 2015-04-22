@@ -4,14 +4,14 @@ public interface IDriver {
 
 	//Messages that can be sent
 	
-	public void ack();
-	public void getStatus();
-	public void unlock();
-	public void lock();
-	public void enable();
-	public void disable();
-	public void getBikeID();
-	public void initialize();
-	public void reset();
-	public void readyToSend();
+	public Empty ack();
+	public Empty getStatus();
+	public Empty unlock();
+	public Empty lock();
+	public Empty enable();
+	public Empty disable();
+	public Empty getBikeID();
+	public Empty initialize();
+	public Empty reset();
+	public Empty readyToSend();
 }

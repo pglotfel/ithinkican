@@ -1,13 +1,21 @@
 package ithinkican.MCP2515;
 
+import ithinkican.driver.Empty;
 import ithinkican.driver.IConducer;
 import ithinkican.driver.IDriver;
+import ithinkican.driver.NetworkManager;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
 
 import java.awt.Event;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
@@ -22,24 +30,21 @@ import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
 import com.pi4j.io.spi.SpiMode;
 
-public class MCP2515 implements IDriver, IConducer<Byte[], Byte[]> {
+public class MCP2515 implements IDriver {
+	
+	//TODO:  Separate this into "Driver" and "MCP2515" classes.
 	
 	private SpiDevice driver;
-	private LinkedBlockingQueue<Byte[]> in;
-	private LinkedBlockingQueue<Byte[]> out;
 	
     private final GpioController gpio = GpioFactory.getInstance();
 
     // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
     private final GpioPinDigitalInput messageInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_29);   
 	
-	public MCP2515(SPIChannel channel, SPIMode mode, int speed) throws IOException {
+	public MCP2515(NetworkManager manager, SPIChannel channel, SPIMode mode, int speed) throws IOException {
 		
 		SpiChannel c = null;
 		SpiMode m = null;
-		
-		in = new LinkedBlockingQueue<Byte[]>();
-		out = new LinkedBlockingQueue<Byte[]>();
 		
 		messageInterrupt.addListener(new GpioPinListenerDigital() {	    	 
 	    	  
@@ -83,163 +88,225 @@ public class MCP2515 implements IDriver, IConducer<Byte[], Byte[]> {
 		}
 				
 		driver = SpiFactory.getInstance(c, speed, m);
-	}
-
-	@Override
-	public void ack() {
 		
-		try {
-			for(int i = 0; i < MCP2515Messages.ack.length; i++) {
-				driver.write(MCP2515Messages.ack[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}		
-	}
-
-	@Override
-	public void getStatus() {
-		
-		try {
-			for(int i = 0; i < MCP2515Messages.getStatus.length; i++) {
-				driver.write(MCP2515Messages.getStatus[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}		
-	}
-
-	@Override
-	public void unlock() {
-		
-		try {
-			for(int i = 0; i < MCP2515Messages.unlock.length; i++) {
-				driver.write(MCP2515Messages.unlock[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void lock() {
-		
-		try {
-			for(int i = 0; i < MCP2515Messages.lock.length; i++) {
-				driver.write(MCP2515Messages.lock[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}	
-	}
-
-	@Override
-	public void enable() {
-		
-		try {
-			for(int i = 0; i < MCP2515Messages.enable.length; i++) {
-				driver.write(MCP2515Messages.enable[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void disable() {
-		
-		try {
-			for(int i = 0; i < MCP2515Messages.disable.length; i++) {
-				driver.write(MCP2515Messages.disable[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void getBikeID() {
-		
-		try {
-			for(int i = 0; i < MCP2515Messages.getBikeID.length; i++) {
-				driver.write(MCP2515Messages.getBikeID[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void initialize() {
-		
-		try {
-			for(int i = 0; i < MCP2515Messages.initialize.length; i++) {
-				driver.write(MCP2515Messages.initialize[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void reset() {
-		
-		try {
-			driver.write(MCP2515Messages.reset);
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void readyToSend() {
-		try {
-			for(int i = 0; i < MCP2515Messages.readyToSend.length; i++) {
-				driver.write(MCP2515Messages.readyToSend[i]);
-			}
-		} catch (IOException e) {
-			//TODO: Elevate the exception
-			e.printStackTrace();
-		}		
-	}
-
-	@Override
-	public int getQueueSize() {
-		
-		return in.size();
-	}
-
-	@Override
-	public boolean accept(Byte[] b) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Byte[] receive() {
-		
-		Byte[] ret = null;
-		
-		try {
-			ret = in.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return ret;
+		//Set up threading 
 	}
 	
+	@Override
+	public Empty ack() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				
+				try {
+					for(int i = 0; i < MCP2515Messages.ack.length; i++) {
+						driver.write(MCP2515Messages.ack[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}				
+			}		
+		};	
+	}
+
+	@Override
+	public Empty getStatus() {
+		
+		return new Empty() {
+			
+			@Override
+			public void call() {
+				try {
+					for(int i = 0; i < MCP2515Messages.getStatus.length; i++) {
+						driver.write(MCP2515Messages.getStatus[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}			
+			}	
+		};
+	}
+
+	@Override
+	public Empty unlock() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				
+				try {
+					for(int i = 0; i < MCP2515Messages.unlock.length; i++) {
+						driver.write(MCP2515Messages.unlock[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}
+				
+			}
+			
+		};
+	}
+
+	@Override
+	public Empty lock() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				
+				try {
+					for(int i = 0; i < MCP2515Messages.lock.length; i++) {
+						driver.write(MCP2515Messages.lock[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}				
+			}
+		};	
+	}
+
+	@Override
+	public Empty enable() {
+		
+		return new Empty() {
+			
+			
+
+			@Override
+			public void call() {
+				
+				try {
+					for(int i = 0; i < MCP2515Messages.enable.length; i++) {
+						driver.write(MCP2515Messages.enable[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}
+				
+			}
+			
+		};
+	}
+
+	@Override
+	public Empty disable() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				
+				try {
+					for(int i = 0; i < MCP2515Messages.disable.length; i++) {
+						driver.write(MCP2515Messages.disable[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}
+				
+			}
+		};
+
+	}
+
+	@Override
+	public Empty getBikeID() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				
+				try {
+					for(int i = 0; i < MCP2515Messages.getBikeID.length; i++) {
+						driver.write(MCP2515Messages.getBikeID[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}
+				
+			}
+			
+		};
+
+	}
+
+	@Override
+	public Empty initialize() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				
+				try {
+					for(int i = 0; i < MCP2515Messages.initialize.length; i++) {
+						driver.write(MCP2515Messages.initialize[i]);
+					}
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}
+				
+			}
+			
+		};
+
+	}
+
+	@Override
+	public Empty reset() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				
+				try {
+					driver.write(MCP2515Messages.reset);
+				} catch (IOException e) {
+					//TODO: Elevate the exception
+					e.printStackTrace();
+				}
+				
+			}
+			
+		};
+
+	}
+
+	@Override
+	public Empty readyToSend() {
+		
+		return new Empty() {
+
+			@Override
+			public void call() {
+				try {
+					for(int i = 0; i < MCP2515Messages.readyToSend.length; i++) {
+						driver.write(MCP2515Messages.readyToSend[i]);
+					}
+				} catch (IOException e) {
+
+					e.printStackTrace();
+				}
+				
+			}		
+		};
+	}
 	
-	//NOT CURRENT IN AN INTERFACE
+	//NOT CURRENTly IN AN INTERFACE
 	public byte[] readByte(int address) {
 		
 		byte[] msg = {(byte) 0x03, (byte) address, (byte) 0xDF};

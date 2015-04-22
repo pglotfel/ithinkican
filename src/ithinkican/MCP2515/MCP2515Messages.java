@@ -1,5 +1,7 @@
 package ithinkican.MCP2515;
 
+import ithinkican.driver.Empty;
+
 public class MCP2515Messages {
 	
 	public static final byte[] reset = {
@@ -24,7 +26,7 @@ public class MCP2515Messages {
 		{0x02, 0x39, 0x03},
 		{(byte) 0x81}
 		};
-	
+
 	public static final byte[][] lock = {
 		{0x02, 0x31, 0x11}, 
 		{0x02, 0x32, 0x00}, 
