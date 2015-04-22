@@ -1,26 +1,18 @@
 package ithinkican.MCP2515;
 
 import ithinkican.driver.Empty;
-import ithinkican.driver.IConducer;
 import ithinkican.driver.IDriver;
 import ithinkican.driver.NetworkManager;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
 
-import java.awt.Event;
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
@@ -32,19 +24,21 @@ import com.pi4j.io.spi.SpiMode;
 
 public class MCP2515 implements IDriver {
 	
-	//TODO:  Separate this into "Driver" and "MCP2515" classes.
-	
 	private SpiDevice driver;
 	
     private final GpioController gpio = GpioFactory.getInstance();
 
     // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
     private final GpioPinDigitalInput messageInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_29);   
+    
+    private NetworkManager manager;
 	
 	public MCP2515(NetworkManager manager, SPIChannel channel, SPIMode mode, int speed) throws IOException {
 		
 		SpiChannel c = null;
 		SpiMode m = null;
+		
+		this.manager = manager;
 		
 		messageInterrupt.addListener(new GpioPinListenerDigital() {	    	 
 	    	  
@@ -59,6 +53,7 @@ public class MCP2515 implements IDriver {
                 	System.out.println("Clearing buffer zero...");                	
                 	clearBufferOne();     
                 	System.out.println(Integer.toHexString(readByte(0x2C)[2]));
+                	manager.submitRead(read());
                 }
             }
         });
@@ -90,6 +85,19 @@ public class MCP2515 implements IDriver {
 		driver = SpiFactory.getInstance(c, speed, m);
 		
 		//Set up threading 
+	}
+	
+	public Supplier<Byte[]> read() {
+		
+		Supplier<Byte[]> supplier = new Supplier<Byte[]>() {
+
+			@Override
+			public Byte[] get() {
+				return new Byte[1];
+			}			
+		};
+		
+		return supplier;
 	}
 	
 	@Override

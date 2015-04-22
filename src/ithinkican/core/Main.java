@@ -22,20 +22,22 @@ public class Main {
 	
 	public static void main(String[] args) throws IOException {
 		
-		final ExecutorService executor = Executors.newCachedThreadPool();
+		final ExecutorService executor = Executors.newSingleThreadExecutor();
 		
 		final NetworkManager network = new NetworkManager(executor);
 		
 	    final MCP2515 driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);
 	    
-	    driver.reset();
+	    network.submitWrite(driver.reset());
 	    
-	    driver.initialize();
+	    network.submitWrite(driver.initialize());	    
+	    
+	    network.start();
 		
 		StateMachine<String> system = new StateMachine<String>();
 		
 		Process<String, String> ack = new Process<String, String>("ack", str -> {System.out.println("acking!"); 
-																				 network.submit(driver.ack()); 
+																				 network.submitWrite(driver.ack()); 
 																				 return "rts";});
 		
 		Auto<String> rts = new Auto<String>("rts", n -> {try {
@@ -44,7 +46,7 @@ public class Main {
 																	e.printStackTrace();
 															 } 
 		                                                     System.out.println("RTS");
-		                                                     network.submit(driver.readyToSend());
+		                                                     network.submitWrite(driver.readyToSend());
 															 return "sleep";});
 		
 		Auto<String> sleep = new Auto<String>("sleep", n -> {try {

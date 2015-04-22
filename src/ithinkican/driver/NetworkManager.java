@@ -12,15 +12,19 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	
 	private LinkedBlockingQueue<Byte[]> in; //Coming in from the network
 	
-	private LinkedBlockingQueue<Empty> out; //Going out onto the network
+	private LinkedBlockingQueue<Empty> tasks; //Going out onto the network
 	
-	private final Callable<Void> task = new Callable<Void>() {
+	//TODO: Would it be better to have the incoming messages be given to "subscribers" notify style?
+	
+	private ExecutorService executor;
+	
+	private final Callable<Void> batch = new Callable<Void>() {
 
 		@Override
 		public Void call() throws Exception {
 			
 			while(true) {			
-				out.take().call();
+				tasks.take().call();
 				System.out.println("Executing command...");
 			}
 		}		
@@ -31,9 +35,12 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	public NetworkManager(ExecutorService executor) throws IOException {
 		
 		in = new LinkedBlockingQueue<Byte[]>();
-		out = new LinkedBlockingQueue<Empty>();
-		future = executor.submit(task);
-		
+		tasks = new LinkedBlockingQueue<Empty>();
+		this.executor = executor;
+	}
+	
+	public void start() {
+		future = executor.submit(batch);
 	}
 	
 	public void shutdown() {
@@ -47,13 +54,13 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	}
 
 	@Override
-	public boolean submit(Empty e) {
-		return out.add(e);
+	public boolean submitWrite(Empty e) {
+		return tasks.add(e);
 	}
 	
 
 	@Override
-	public boolean submit(Supplier<Byte[]> supplier, CompletableFuture<Byte[]> future) {
+	public boolean submitWrite(Supplier<Byte[]> supplier, CompletableFuture<Byte[]> future) {
 		
 		Empty e = new Empty() {
 
@@ -64,7 +71,21 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 			}			
 		};
 		
-		return submit(e);
+		return submitWrite(e);
+	}
+	
+	@Override
+	public boolean submitRead(Supplier<Byte[]> supplier) {
+		
+		Empty e = new Empty() {
+
+			@Override
+			public void call() {
+				in.add(supplier.get());
+			}	
+		};
+		
+		return submitWrite(e);	
 	}
 
 
