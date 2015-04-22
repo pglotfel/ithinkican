@@ -6,15 +6,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class NetworkManager implements IConducer<Empty, Byte[]> {
 	
-	private LinkedBlockingQueue<Byte[]> in; //Coming in from the network
+	private LinkedBlockingQueue<Byte[]> data; //Houses data from the network
 	
-	private LinkedBlockingQueue<Empty> tasks; //Going out onto the network
-	
-	//TODO: Would it be better to have the incoming messages be given to "subscribers" notify style?
+	private LinkedBlockingQueue<Empty> tasks; //Houses tasks that are to be deployed onto the network.  These can be reads or writes, because they must mutually exclusively access the network.
 	
 	private ExecutorService executor;
 	
@@ -34,7 +33,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	
 	public NetworkManager(ExecutorService executor) throws IOException {
 		
-		in = new LinkedBlockingQueue<Byte[]>();
+		data = new LinkedBlockingQueue<Byte[]>();
 		tasks = new LinkedBlockingQueue<Empty>();
 		this.executor = executor;
 	}
@@ -50,7 +49,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	@Override
 	public int getQueueSize() {
 		
-		return in.size();
+		return tasks.size();
 	}
 
 	@Override
@@ -81,7 +80,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 
 			@Override
 			public void call() {
-				in.add(supplier.get());
+				data.add(supplier.get());
 			}	
 		};
 		
@@ -95,7 +94,21 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 		Byte[] ret = null;
 		
 		try {
-			ret = in.take();
+			ret = data.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return ret;
+	}
+
+	@Override
+	public Byte[] recieve(int timeout) {
+		
+		Byte[] ret = null;
+		
+		try {
+			ret = data.poll(timeout, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
