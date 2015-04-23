@@ -29,7 +29,6 @@ public class MCP2515 implements IDriver {
 
     // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
     public GpioPinDigitalInput bufferZeroInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_29);  
-    public GpioPinDigitalInput bufferOneInterrupt = gpio.provisionDigitalInputPin(RaspiPin.GPIO_27);  
     
     private NetworkManager manager;
 	
@@ -84,55 +83,7 @@ public class MCP2515 implements IDriver {
                 }
             }
         });
-		
-		bufferOneInterrupt.addListener(new GpioPinListenerDigital() {	    	 
-	    	  
-			@Override
-            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-				// display pin state on console
-                
-				System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
-				
-                if(event.getState() == PinState.LOW) {
-                	
-                	//Message is in RX0
-                	manager.submitRead(readBufferOne());
-                }
-            }
-        });
 	}
-	
-//	public Supplier<Byte[]> readBufferZero() {
-//		
-//		Supplier<Byte[]> supplier = new Supplier<Byte[]>() {
-//
-//			@Override
-//			public Byte[] get() {           	 
-//            	
-//            	int b0 = (readByte(0x65)[2] & 0x0F);
-//            	
-//            	//Ensure that we only get 8 bytes...
-//            	
-//            	if(b0 > 8) {
-//            		b0 = 8;
-//            	}
-//            	            	
-//            	Byte[] b = new Byte[b0];
-//        		
-//            	for(int i = 0; i < b0; i++) {         		
-//            		b[i] = readByte((102 + i) & 0xFF)[2];
-//            	}
-//	            	
-//            	clearBufferZero();   
-//            	
-//            	System.out.println("Clearing buffer 0");
-//        		
-//				return b;
-//			}			
-//		};
-//		
-//		return supplier;
-//	}
 	
 	public Supplier<Byte[]> readBufferZero() {
 		
@@ -166,38 +117,6 @@ public class MCP2515 implements IDriver {
 		
 		return supplier;
 	}
-	
-//	public Supplier<Byte[]> readBufferOne() {
-//		
-//		Supplier<Byte[]> supplier = new Supplier<Byte[]>() {
-//
-//			@Override
-//			public Byte[] get() {           	 
-//            	
-//            	int b1 = (readByte(0x75)[2] & 0x0F);
-//            	
-//            	//Ensure that we only get 8 bytes...
-//            	
-//            	if(b1 > 8) {
-//            		b1 = 8;
-//            	}
-//            	            	
-//            	Byte[] b = new Byte[b1];
-//        		
-//            	for(int i = 0; i < b1; i++) {         		
-//            		b[i] = readByte((117 + i) & 0xFF)[2];
-//            	}
-//	            	
-//            	clearBufferOne();   
-//            	
-//            	System.out.println("Clearing buffer 1");
-//        		
-//				return b;
-//			}			
-//		};
-//		
-//		return supplier;
-//	}
 	
 	public Supplier<Byte[]> readBufferOne() {
 		

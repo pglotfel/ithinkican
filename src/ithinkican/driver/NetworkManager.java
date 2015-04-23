@@ -1,11 +1,12 @@
 package ithinkican.driver;
 
 import java.io.IOException;
+import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -13,48 +14,73 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	
 	private LinkedBlockingQueue<Byte[]> data; //Houses data from the network
 	
+	private LinkedBlockingQueue<Empty> writeTasks; 
 	private LinkedBlockingQueue<Empty> tasks; //Houses tasks that are to be deployed onto the network.  These can be reads or writes, because they must mutually exclusively access the network.
 	
-	private ExecutorService executor;
+	private ScheduledExecutorService executor;
 	
-	private final Callable<Void> batch = new Callable<Void>() {
+	private final Runnable addWrites = new Runnable() {
+
+		@Override
+		public void run() {
+			
+			try {
+				
+				System.out.println("Adding write command...");
+				Empty e = writeTasks.take();
+				tasks.add(e);
+			} catch (InterruptedException e) {
+				// TODO Elevate error?
+				e.printStackTrace();
+			}	
+		}		
+	};
+	
+	private final Callable<Void> executeTasks = new Callable<Void>() {
 
 		@Override
 		public Void call() throws Exception {
 			
-			while(true) {			
-				tasks.take().call();
+			while(true) {						
 				System.out.println("Executing command...");
+				tasks.take().call();
 			}
 		}		
 	};
 	
-	private Future<Void> future;
+	private Vector<Future<?>> futures;
 	
-	public NetworkManager(ExecutorService executor) throws IOException {
+	public NetworkManager(ScheduledExecutorService executor) throws IOException {
 		
 		data = new LinkedBlockingQueue<Byte[]>();
+		writeTasks = new LinkedBlockingQueue<Empty>();
 		tasks = new LinkedBlockingQueue<Empty>();
+		futures = new Vector<Future<?>>();
 		this.executor = executor;
 	}
 	
 	public void start() {
-		future = executor.submit(batch);
+		
+		futures.add(executor.schedule(executeTasks, 0, TimeUnit.MILLISECONDS));
+		futures.add(executor.scheduleAtFixedRate(addWrites, 0, 100, TimeUnit.MILLISECONDS));
 	}
 	
 	public void shutdown() {
-		future.cancel(true);
+		
+		for(Future<?> f : futures) {
+			f.cancel(true);
+		}
 	}
 
 	@Override
 	public int getQueueSize() {
 		
-		return tasks.size();
+		return writeTasks.size();
 	}
 
 	@Override
 	public boolean submitWrite(Empty e) {
-		return tasks.add(e);
+		return writeTasks.add(e);
 	}
 	
 
@@ -84,7 +110,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 			}	
 		};
 		
-		return submitWrite(e);	
+		return tasks.add(e);	
 	}
 
 

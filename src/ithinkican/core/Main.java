@@ -2,7 +2,6 @@ package ithinkican.core;
 
 import ithinkican.MCP2515.MCP2515;
 import ithinkican.driver.NetworkManager;
-import ithinkican.driver.SPI;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
 import ithinkican.statemachine.Auto;
@@ -10,13 +9,8 @@ import ithinkican.statemachine.Process;
 import ithinkican.statemachine.StateMachine;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.pi4j.io.spi.SpiChannel;
-import com.pi4j.io.spi.SpiDevice;
-import com.pi4j.io.spi.SpiFactory;
-import com.pi4j.io.spi.SpiMode;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class Main {
 	
@@ -35,14 +29,12 @@ public class Main {
 	
 	public static void main(String[] args) throws IOException {
 		
-		ExecutorService executor = Executors.newSingleThreadExecutor();
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 		
 		NetworkManager network = new NetworkManager(executor);
 		
 	    MCP2515 driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);	      
-        
-
-	    
+           
 	    driver.reset().call();    
 	    
 	    //Attach interrupts after reset
@@ -80,7 +72,6 @@ public class Main {
 															 } 
 		                                                     System.out.println("RTS");
 		                                                     network.submitWrite(driver.readyToSend());
-		                                                     print(network.receive(1000));
 		                                                     print(network.receive(1000));
 															 return "sleep";});
 		
