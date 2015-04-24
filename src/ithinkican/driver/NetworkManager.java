@@ -24,14 +24,12 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 		@Override
 		public void run() {
 			
-			try {
-				
-				System.out.println("Adding write command...");
-				Empty e = writeTasks.take();
+			System.out.println("Adding write command...");
+			
+			Empty e = writeTasks.poll();
+			
+			if(e != null) {
 				tasks.add(e);
-			} catch (InterruptedException e) {
-				// TODO Elevate error?
-				e.printStackTrace();
 			}	
 		}		
 	};
@@ -75,7 +73,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	@Override
 	public int getQueueSize() {
 		
-		return writeTasks.size();
+		return tasks.size();
 	}
 
 	@Override

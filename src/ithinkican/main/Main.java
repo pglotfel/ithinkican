@@ -1,4 +1,4 @@
-package ithinkican.core;
+package ithinkican.main;
 
 import ithinkican.MCP2515.MCP2515;
 import ithinkican.driver.NetworkManager;
@@ -8,7 +8,11 @@ import ithinkican.statemachine.Auto;
 import ithinkican.statemachine.Process;
 import ithinkican.statemachine.StateMachine;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -28,6 +32,24 @@ public class Main {
 	} 
 	
 	public static void main(String[] args) throws IOException {
+		
+		
+		//TCP CODE ######################################################## 
+		
+		try {
+			Socket clientSocket = new Socket("localhost", 8081);
+			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+		} catch (IOException e) {
+			System.err.println("Couldn't connect to TCP server...");
+			e.printStackTrace();
+		}
+		  
+		  //Portion this out into things when the button is pressed...
+		  
+		  //outToServer.writeBytes(sentence);
+		  
+		//#################################################################
+		
 		
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 		
