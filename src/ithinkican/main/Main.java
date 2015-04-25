@@ -4,16 +4,17 @@ import ithinkican.MCP2515.MCP2515;
 import ithinkican.driver.NetworkManager;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
+import ithinkican.parser.Multiplexer;
+import ithinkican.parser.Stream;
 import ithinkican.rfid.Reader;
 import ithinkican.statemachine.Auto;
 import ithinkican.statemachine.Process;
 import ithinkican.statemachine.StateMachine;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -61,9 +62,19 @@ public class Main {
 		//#################################################################
 		
 		
-		ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+		ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
 		
 		NetworkManager network = new NetworkManager(executor);
+		
+		Multiplexer mux = new Multiplexer(executor, network.getData());
+		
+		Stream status = new Stream();
+		
+		//Status messages
+		mux.addHandler(bs -> (bs[0] == 0x11), status);
+		
+		//Just handle returns immediately
+		mux.addHandler(bs -> (bs[0] == 0x08), bs -> System.out.println("Got a return!"));
 		
 	    MCP2515 driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);	      
            
@@ -79,10 +90,13 @@ public class Main {
 	        
 	    network.start();    
 	    
+	    mux.start();	    
+	    
 	    //Attempt to clear out buffers.  Completely arbitrary
 	    
-        print(network.receive(1000));
-        print(network.receive(1000));      
+	    //TODO: Can get the network queue then try to grab messages?
+//        print(network.receive(1000));
+//        print(network.receive(1000));      
         
         try {
 			Thread.sleep(5000);
@@ -94,7 +108,7 @@ public class Main {
 		StateMachine<String> system = new StateMachine<String>();
 		
 		Process<String, String> ack = new Process<String, String>("ack", str -> {//System.out.println("acking!"); 
-																				 //network.submitWrite(driver.ack()); 
+																				 network.submitWrite(driver.getStatus()); 
 																				 return "rts";});
 		
 		Auto<String> rts = new Auto<String>("rts", n -> {try {
@@ -104,7 +118,15 @@ public class Main {
 															 } 
 		                                                     System.out.println("RTS");
 		                                                     network.submitWrite(driver.readyToSend());
-		                                                     print(network.receive(1000));
+		                                                     
+		                                                     Byte[] b = status.receive(1000);
+		                                                     print(b);
+		                                                     System.out.println(b[1]);
+		                                                     if(b[1] != 0) {
+		                                                    	 network.submitWrite(driver.unlock());
+		                                                     } else {
+		                                                    	 System.out.println("No bike!");
+		                                                     }
 															 return "sleep";});
 		
 		Auto<String> sleep = new Auto<String>("sleep", n -> {try {
@@ -120,7 +142,12 @@ public class Main {
 		
 		system.setInitialState("ack");
 		
+		//TODO: Ewwwww.  Only for a test!
+		
+		Scanner s = new Scanner(System.in);
+		
 		while(true) {
+			s.next();
 			system.accept("arg");
 		}
 	}

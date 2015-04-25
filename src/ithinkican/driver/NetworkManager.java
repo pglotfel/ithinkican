@@ -10,7 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class NetworkManager implements IConducer<Event, Byte[]> {
+public class NetworkManager {
 	
 	private LinkedBlockingQueue<Byte[]> data; //Houses data from the network	
 	private LinkedBlockingQueue<Event> writeTasks; 
@@ -68,19 +68,14 @@ public class NetworkManager implements IConducer<Event, Byte[]> {
 		}
 	}
 
-	@Override
-	public int getQueueSize() {
-		
+	public int getQueueSize() {	
 		return tasks.size();
 	}
 
-	@Override
 	public boolean submitWrite(Event e) {
 		return writeTasks.add(e);
 	}
 	
-
-	@Override
 	public boolean submitWrite(Supplier<Byte[]> supplier, CompletableFuture<Byte[]> future) {
 		
 		Event e = new Event() {
@@ -95,7 +90,6 @@ public class NetworkManager implements IConducer<Event, Byte[]> {
 		return submitWrite(e);
 	}
 	
-	@Override
 	public boolean submitRead(Supplier<Byte[]> supplier) {
 		
 		Event e = new Event() {
@@ -110,31 +104,7 @@ public class NetworkManager implements IConducer<Event, Byte[]> {
 	}
 
 
-	@Override
-	public Byte[] receive() {
-		
-		Byte[] ret = null;
-		
-		try {
-			ret = data.take();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return ret;
-	}
-
-	@Override
-	public Byte[] receive(int timeout) {
-		
-		Byte[] ret = null;
-		
-		try {
-			ret = data.poll(timeout, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return ret;
+	public LinkedBlockingQueue<Byte[]> getData() {
+		return data;
 	}
 }

@@ -37,7 +37,7 @@ public class Reader {
 						for(int i = 0; i < inputSize; i++) {
 							if(parser.parse(b.get(i)) == State.COMPLETE) {
 								byte[] msg = parser.getMessage();
-								handleEvent(msg);							
+								handle(msg);							
 							}					
 						}
 					} catch (SerialPortException e1) {
@@ -58,11 +58,9 @@ public class Reader {
 		events.add(e);
 	}
 	
-	public void handleEvent(byte[] b) {		
-		synchronized(events) {
-			for(Event e : events) {
-				e.call(b);
-			}
-		}
+	public void handle(byte[] b) {			
+		for(Event e : events) {
+			e.call(b);
+		}	
 	}
 }

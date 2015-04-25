@@ -68,6 +68,9 @@ public class ConcurrentStateMachine<T> implements Consumer<T> {
 			result = states.get(result.apply(null));
 		}
 		
+		//Clear any inpue (i.e., prevent button mashing)
+		queue.clear();
+		
 		currentState = result;
 	}
 	
