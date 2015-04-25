@@ -3,14 +3,14 @@
 java_binary(
         name = "build",
         srcs = glob(["src/**/*.java"]),
-        main_class = "ithinkican.core.Main",
+        main_class = "ithinkican.main.Main",
 	deps = [":pi4j"]
 )
 
 java_import(
 	name = "pi4j",
 	jars = [
-
+		"misc/jssc.jar",
 		"misc/pi4j-core.jar",
 		"misc/pi4j-core-javadoc.jar",
 		"misc/pi4j-core-sources.jar",

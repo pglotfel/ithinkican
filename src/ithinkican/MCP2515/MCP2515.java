@@ -1,6 +1,6 @@
 package ithinkican.MCP2515;
 
-import ithinkican.driver.Empty;
+import ithinkican.driver.Event;
 import ithinkican.driver.IDriver;
 import ithinkican.driver.NetworkManager;
 import ithinkican.driver.SPIChannel;
@@ -74,7 +74,7 @@ public class MCP2515 implements IDriver {
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
 				// display pin state on console
                 
-				System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
+				//System.out.println(" --> MESSAGE RECEIVED: " + event.getPin() + " = " + event.getState());
                 
                 if(event.getState() == PinState.LOW) {
                 	
@@ -152,9 +152,9 @@ public class MCP2515 implements IDriver {
 	}
 	
 	@Override
-	public Empty ack() {
+	public Event ack() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {
@@ -172,9 +172,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty getStatus() {
+	public Event getStatus() {
 		
-		return new Empty() {
+		return new Event() {
 			
 			@Override
 			public void call() {
@@ -191,9 +191,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty unlock() {
+	public Event unlock() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {
@@ -213,9 +213,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty lock() {
+	public Event lock() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {
@@ -233,9 +233,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty enable() {
+	public Event enable() {
 		
-		return new Empty() {
+		return new Event() {
 			
 			
 
@@ -257,9 +257,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty disable() {
+	public Event disable() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {
@@ -279,9 +279,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty getBikeID() {
+	public Event getBikeID() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {
@@ -302,9 +302,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty initialize() {
+	public Event initialize() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {
@@ -325,9 +325,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty reset() {
+	public Event reset() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {
@@ -346,9 +346,9 @@ public class MCP2515 implements IDriver {
 	}
 
 	@Override
-	public Empty readyToSend() {
+	public Event readyToSend() {
 		
-		return new Empty() {
+		return new Event() {
 
 			@Override
 			public void call() {

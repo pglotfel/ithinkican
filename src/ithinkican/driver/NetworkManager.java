@@ -10,12 +10,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class NetworkManager implements IConducer<Empty, Byte[]> {
+public class NetworkManager implements IConducer<Event, Byte[]> {
 	
-	private LinkedBlockingQueue<Byte[]> data; //Houses data from the network
-	
-	private LinkedBlockingQueue<Empty> writeTasks; 
-	private LinkedBlockingQueue<Empty> tasks; //Houses tasks that are to be deployed onto the network.  These can be reads or writes, because they must mutually exclusively access the network.
+	private LinkedBlockingQueue<Byte[]> data; //Houses data from the network	
+	private LinkedBlockingQueue<Event> writeTasks; 
+	private LinkedBlockingQueue<Event> tasks; //Houses tasks that are to be deployed onto the network.  These can be reads or writes, because they must mutually exclusively access the network.
 	
 	private ScheduledExecutorService executor;
 	
@@ -24,11 +23,10 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 		@Override
 		public void run() {
 			
-			System.out.println("Adding write command...");
-			
-			Empty e = writeTasks.poll();
+			Event e = writeTasks.poll();
 			
 			if(e != null) {
+				//System.out.println("Adding write command...");
 				tasks.add(e);
 			}	
 		}		
@@ -40,7 +38,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 		public Void call() throws Exception {
 			
 			while(true) {						
-				System.out.println("Executing command...");
+				//System.out.println("Executing command...");
 				tasks.take().call();
 			}
 		}		
@@ -51,8 +49,8 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	public NetworkManager(ScheduledExecutorService executor) throws IOException {
 		
 		data = new LinkedBlockingQueue<Byte[]>();
-		writeTasks = new LinkedBlockingQueue<Empty>();
-		tasks = new LinkedBlockingQueue<Empty>();
+		writeTasks = new LinkedBlockingQueue<Event>();
+		tasks = new LinkedBlockingQueue<Event>();
 		futures = new Vector<Future<?>>();
 		this.executor = executor;
 	}
@@ -77,7 +75,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	}
 
 	@Override
-	public boolean submitWrite(Empty e) {
+	public boolean submitWrite(Event e) {
 		return writeTasks.add(e);
 	}
 	
@@ -85,7 +83,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	@Override
 	public boolean submitWrite(Supplier<Byte[]> supplier, CompletableFuture<Byte[]> future) {
 		
-		Empty e = new Empty() {
+		Event e = new Event() {
 
 			@Override
 			public void call() {
@@ -100,7 +98,7 @@ public class NetworkManager implements IConducer<Empty, Byte[]> {
 	@Override
 	public boolean submitRead(Supplier<Byte[]> supplier) {
 		
-		Empty e = new Empty() {
+		Event e = new Event() {
 
 			@Override
 			public void call() {

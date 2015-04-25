@@ -1,6 +1,6 @@
 package ithinkican.fake;
 
-import ithinkican.driver.Empty;
+import ithinkican.driver.Event;
 import ithinkican.driver.IDriver;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,11 +15,11 @@ public class FakeCAN implements IDriver {
 	}
 
 	@Override
-	public Empty ack() {
+	public Event ack() {
 		return null;}
 
 	@Override
-	public Empty getStatus() {
+	public Event getStatus() {
 
 		byte[] response = {0x01, 0x01, 0x01, 0x01};
 		
@@ -32,24 +32,24 @@ public class FakeCAN implements IDriver {
 	}
 
 	@Override
-	public Empty unlock() {
+	public Event unlock() {
 		return null;
 		}
 
 	@Override
-	public Empty lock() {
+	public Event lock() {
 		return null;}
 
 	@Override
-	public Empty enable() {
+	public Event enable() {
 		return null;}
 
 	@Override
-	public Empty disable() {
+	public Event disable() {
 		return null;}
 
 	@Override
-	public Empty getBikeID() {
+	public Event getBikeID() {
 		
 		byte[] response = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 		
@@ -62,21 +62,21 @@ public class FakeCAN implements IDriver {
 	}
 	
 	@Override
-	public Empty initialize() {
+	public Event initialize() {
 		return null;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Empty reset() {
+	public Event reset() {
 		return null;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Empty readyToSend() {
+	public Event readyToSend() {
 		return null;
 		// TODO Auto-generated method stub
 		

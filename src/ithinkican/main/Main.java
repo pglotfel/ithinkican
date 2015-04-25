@@ -4,6 +4,7 @@ import ithinkican.MCP2515.MCP2515;
 import ithinkican.driver.NetworkManager;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
+import ithinkican.rfid.Reader;
 import ithinkican.statemachine.Auto;
 import ithinkican.statemachine.Process;
 import ithinkican.statemachine.StateMachine;
@@ -15,6 +16,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+
+import jssc.SerialPortException;
 
 public class Main {
 	
@@ -41,7 +44,14 @@ public class Main {
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 		} catch (IOException e) {
 			System.err.println("Couldn't connect to TCP server...");
-			e.printStackTrace();
+		}
+		
+		Reader rfid = new Reader("/dev/ttyUSB0");
+		rfid.addEvent(b -> {System.out.println("Got message!");});
+		try {
+			rfid.start();
+		} catch (SerialPortException e2) {
+			System.err.println("Couldn't connect to RFID module...");
 		}
 		  
 		  //Portion this out into things when the button is pressed...

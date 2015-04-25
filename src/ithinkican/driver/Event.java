@@ -1,6 +1,6 @@
 package ithinkican.driver;
 
 @FunctionalInterface
-public interface Empty {
+public interface Event {
 	public void call();
 }
