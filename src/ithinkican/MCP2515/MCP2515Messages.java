@@ -1,5 +1,11 @@
 package ithinkican.MCP2515;
 
+/**
+ * Contains all CAN controller messages required for ABRS operation.
+ * 
+ * @author Paul G.
+ *
+ */
 public class MCP2515Messages {
 	
 	public static final byte[] reset = {

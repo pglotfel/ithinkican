@@ -1,5 +1,7 @@
 package ithinkican.parser;
 
+import ithinkican.util.Component;
+
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,7 +16,7 @@ import java.util.function.Predicate;
  * @author Paul G.
  *
  */
-public class Multiplexer {
+public class Multiplexer implements Component{
 
 	//This is a class to handle predicate/handler pairs.
 	
@@ -68,6 +70,7 @@ public class Multiplexer {
 	/**
 	 * Starts the multiplexer (i.e., schedules the task on the executor).
 	 */
+	@Override
 	public void start() {
 		future = executor.schedule(task, 0, TimeUnit.MILLISECONDS);
 	}
@@ -75,6 +78,7 @@ public class Multiplexer {
 	/**
 	 * Stops the multiplexer (i.e., cancels the running task).
 	 */
+	@Override
 	public void stop() {
 		future.cancel(true);
 	}	

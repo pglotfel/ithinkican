@@ -1,5 +1,7 @@
 package ithinkican.statemachine;
 
+import ithinkican.util.Component;
+
 import java.util.HashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -7,7 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class ConcurrentStateMachine<T> implements Consumer<T> {
+public class ConcurrentStateMachine<T> implements Consumer<T>, Component {
 	
 	private HashMap<T, State<T>> states;
 	private State<T> currentState;
@@ -36,12 +38,14 @@ public class ConcurrentStateMachine<T> implements Consumer<T> {
 		currentState = null;
 	}
 	
+	@Override
 	public void start() {
 		
 		future = executor.schedule(executeTasks, 0, TimeUnit.MILLISECONDS);
 	}
 	
-	public void shutdown() {
+	@Override
+	public void stop() {
 		
 		future.cancel(true);
 	}

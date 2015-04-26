@@ -1,5 +1,13 @@
 package ithinkican.driver;
 
+import ithinkican.network.Event;
+
+/**
+ * The interface for the CAN driver.  Contains all methods required to successfully handle all ABRS requirements.
+ * 
+ * @author Paul G.
+ *
+ */
 public interface IDriver {
 
 	//Messages that can be sent

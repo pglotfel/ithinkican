@@ -1,5 +1,11 @@
 package ithinkican.driver;
 
+/**
+ * Enum for SPI mode.
+ * 
+ * @author Paul G.
+ *
+ */
 public enum SPIMode {
 	
 	MODE0, 

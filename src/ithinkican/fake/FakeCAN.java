@@ -1,10 +1,16 @@
 package ithinkican.fake;
 
-import ithinkican.driver.Event;
 import ithinkican.driver.IDriver;
+import ithinkican.network.Event;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Fake CAN driver for testing.  Not currently fully implemented!
+ * 
+ * @author Paul G.
+ *
+ */
 public class FakeCAN implements IDriver {
 	
 	private LinkedBlockingQueue<byte[]> queue;
@@ -60,13 +66,6 @@ public class FakeCAN implements IDriver {
 		}
 		return null;	
 	}
-	
-	@Override
-	public Event initialize() {
-		return null;
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public Event reset() {
@@ -80,5 +79,11 @@ public class FakeCAN implements IDriver {
 		return null;
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Event initialize() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

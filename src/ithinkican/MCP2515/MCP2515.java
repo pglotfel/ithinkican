@@ -1,10 +1,11 @@
 package ithinkican.MCP2515;
 
-import ithinkican.driver.Event;
 import ithinkican.driver.IDriver;
-import ithinkican.driver.NetworkManager;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
+import ithinkican.network.Event;
+import ithinkican.network.NetworkManager;
+import ithinkican.util.Component;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -21,7 +22,7 @@ import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
 import com.pi4j.io.spi.SpiMode;
 
-public class MCP2515 implements IDriver {
+public class MCP2515 implements IDriver, Component {
 	
 	private SpiDevice driver;
 	
@@ -66,6 +67,7 @@ public class MCP2515 implements IDriver {
 		driver = SpiFactory.getInstance(c, speed, m);
 	}
 	
+	@Override
 	public void start() {
 		
 		bufferZeroInterrupt.addListener(new GpioPinListenerDigital() {	    	 
@@ -83,6 +85,12 @@ public class MCP2515 implements IDriver {
                 }
             }
         });
+	}
+
+	@Override
+	public void stop() {
+		
+		gpio.shutdown();
 	}
 	
 	public Supplier<Byte[]> readBufferZero() {

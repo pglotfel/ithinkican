@@ -1,6 +1,7 @@
 package ithinkican.driver;
 
 /**
+ * Enum for SPI channel.
  * 
  * @author Paul G
  *

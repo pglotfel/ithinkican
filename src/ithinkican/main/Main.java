@@ -1,9 +1,9 @@
 package ithinkican.main;
 
 import ithinkican.MCP2515.MCP2515;
-import ithinkican.driver.NetworkManager;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
+import ithinkican.network.NetworkManager;
 import ithinkican.parser.Multiplexer;
 import ithinkican.parser.Stream;
 import ithinkican.rfid.Reader;
@@ -17,8 +17,6 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import jssc.SerialPortException;
 
 public class Main {
 	
@@ -38,6 +36,8 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		
 		
+		//TODO: Put TCP code in other file.  Put everything into a system graph to start!
+		
 		//TCP CODE ######################################################## 
 		
 		try {
@@ -49,11 +49,7 @@ public class Main {
 		
 		Reader rfid = new Reader("/dev/ttyUSB0");
 		rfid.addEvent(b -> {System.out.println("Got message!");});
-		try {
-			rfid.start();
-		} catch (SerialPortException e2) {
-			System.err.println("Couldn't connect to RFID module...");
-		}
+		rfid.start();
 		  
 		  //Portion this out into things when the button is pressed...
 		  
@@ -64,7 +60,7 @@ public class Main {
 		
 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
 		
-		NetworkManager network = new NetworkManager(executor);
+		NetworkManager network = new NetworkManager(executor, 100);
 		
 		Multiplexer mux = new Multiplexer(executor, network.getData());
 		
@@ -101,7 +97,6 @@ public class Main {
         try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
