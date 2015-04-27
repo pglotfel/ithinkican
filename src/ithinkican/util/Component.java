@@ -7,6 +7,12 @@ package ithinkican.util;
  *
  */
 public interface Component {
+	/**
+	 * Initialize method
+	 */
 	public void start();
+	/**
+	 * Shutdown method
+	 */
 	public void stop();
 }

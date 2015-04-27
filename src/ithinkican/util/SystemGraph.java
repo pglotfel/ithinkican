@@ -1,20 +1,33 @@
 package ithinkican.util;
 
-import ithinkican.util.Node.Color;
+import ithinkican.util.Vertex.Color;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
+/**
+ * <P>A graph that is intended to implement an application of various components.  Components have start() and stop() methods.  This graph can be used to start each component in the correct order.
+ * 
+ * @author Paul G.
+ *
+ */
 public class SystemGraph implements Component {
 	
-	private final HashMap<String, Node> nodes = new HashMap<String, Node>();
+	private final HashMap<String, Vertex> nodes = new HashMap<String, Vertex>();
 	
 	public SystemGraph() {
 		
 	}
 	
-	public void addNode(String identifier, Component component, String...edges) {
+	/**
+	 * <P> Adds a node to the graph
+	 * 
+	 * @param identifier The identifier for the vertex
+	 * @param component The component associated with the vertex
+	 * @param edges The edges of a vertex.  Edges are vertices to which this vertex provides information.
+	 */
+	public void addVertex(String identifier, Component component, String...edges) {
 		
 		HashSet<String> set = new HashSet<String>();
 		
@@ -24,14 +37,25 @@ public class SystemGraph implements Component {
 			}
 		} 
 		
-		nodes.put(identifier, new Node(identifier, set, component));
+		nodes.put(identifier, new Vertex(identifier, set, component));
 	}
 	
+	/**
+	 *<P> Removes a node from the graph.  This method should really not be used...
+	 * 
+	 * @param identifier The identifier of the vertex to be removed.
+	 */
 	public void removeNode(String identifier) {
 		nodes.remove(identifier);
 	}
 	
-	private void topSortVisit(Vector<Node> s, Node u) {
+	/**
+	 * <P> Visit helper method for DFS.  
+	 * 
+	 * @param s The vector in which the solution is stored.
+	 * @param u The vertex being visited
+	 */
+	private void topSortVisit(Vector<Vertex> s, Vertex u) {
 		
 		u.setColor(Color.GREY);
 		
@@ -46,15 +70,20 @@ public class SystemGraph implements Component {
 		s.add(u);
 	}
 	
-	public Vector<Node> topologicalSort() {
+	/**
+	 * <P> Executes a topological sort on 'this' graph.
+	 * 
+	 * @return
+	 */
+	public Vector<Vertex> topologicalSort() {
 		
-		Vector<Node> result = new Vector<Node>();
+		Vector<Vertex> result = new Vector<Vertex>();
 		
-		for(Node n : nodes.values()) {
+		for(Vertex n : nodes.values()) {
 			n.setColor(Color.WHITE);
 		}
 		
-		for(Node n : nodes.values()) {
+		for(Vertex n : nodes.values()) {
 			if(n.color() == Color.WHITE) {
 				topSortVisit(result, n);
 			}
@@ -68,19 +97,20 @@ public class SystemGraph implements Component {
 	@Override
 	public void start() {
 		
-		for(Node n : this.topologicalSort()) {
-			System.out.println(n.identifier());
+		for(Vertex n : this.topologicalSort()) {
+			System.out.print(n.identifier() + " ");
 			n.component().start();
 		}
+		System.out.println();
 	}
 
 	@Override
 	public void stop() {
 		
-		Vector<Node> sorted = this.topologicalSort();
+		Vector<Vertex> sorted = this.topologicalSort();
 		Collections.reverse(sorted);
 		
-		for(Node n : sorted) {
+		for(Vertex n : sorted) {
 			System.out.println(n.identifier());
 			n.component().stop();
 		}

@@ -8,17 +8,55 @@ import ithinkican.parser.Multiplexer;
 import ithinkican.parser.Stream;
 import ithinkican.rfid.Reader;
 import ithinkican.statemachine.Auto;
+import ithinkican.statemachine.ConcurrentStateMachine;
 import ithinkican.statemachine.Process;
-import ithinkican.statemachine.StateMachine;
+import ithinkican.util.Component;
+import ithinkican.util.SystemGraph;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-public class Main {
+public class Main implements Component {
+	
+	private final static SystemGraph application = new SystemGraph();
+	private final static ScheduledExecutorService executor = Executors.newScheduledThreadPool(6);
+	private final static ConcurrentStateMachine<String> sm = new ConcurrentStateMachine<String>(executor);
+	private final static Reader rfid = new Reader("/dev/ttyUSB0");
+	
+	private final static NetworkManager network = new NetworkManager(executor, 100);
+	
+	private final static Stream status = new Stream();
+	private final static Multiplexer mux = new Multiplexer(executor, network.getData());
+	
+	private static MCP2515 driver;
+	
+	private Future<?> future;
+	
+	private static void task() {
+		while(true) {
+			network.submitWrite(driver.readyToSend());
+		}
+	}
+	
+	public Main() throws IOException {
+		driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);	
+	}
+	
+	@Override 
+	public void start() {
+		future = executor.scheduleAtFixedRate(Main::task, 0, 100, TimeUnit.MILLISECONDS);
+	}
+	
+	@Override 
+	public void stop() {
+		future.cancel(true);
+	}
+	
 	
 	public static void print(Byte[] b) {
 		
@@ -31,7 +69,52 @@ public class Main {
 		} else {
 			System.out.println("NOTHING");
 		}
-	} 
+	}
+	
+	public static String init(String input) {
+		
+		System.out.println("init!");
+		
+		String ret = "init";
+		
+		switch(input) {
+		case "rfid": 
+			ret = "get-status";
+			break;
+		default: 
+			ret = "init";
+		}
+		
+		return ret;
+	}
+	
+	public static String getStatus(Void n) {
+		
+		System.out.println("getting status...");
+       
+       Byte[] b = status.receive(1000);
+       
+       print(b);
+             
+       if(b != null) {
+	       if(b[1] != 0) {
+	    	   return "unlock";
+	       } else {
+	    	   return "init";
+	       }      
+       } else {
+    	   return "init";
+       }
+	}
+	
+	public static String unlock(Object n) {
+		
+		System.out.println("unlocking!");
+		
+		network.submitWrite(driver.unlock());
+     	 
+		return "init";
+	}
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -40,110 +123,62 @@ public class Main {
 		
 		//TCP CODE ######################################################## 
 		
+		Main abrs = new Main();
+		
 		try {
 			Socket clientSocket = new Socket("localhost", 8081);
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 		} catch (IOException e) {
 			System.err.println("Couldn't connect to TCP server...");
 		}
-		
-		Reader rfid = new Reader("/dev/ttyUSB0");
-		rfid.addEvent(b -> {System.out.println("Got message!");});
-		rfid.start();
-		  
-		  //Portion this out into things when the button is pressed...
-		  
-		  //outToServer.writeBytes(sentence);
-		  
-		//#################################################################
-		
-		
-		ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
-		
-		NetworkManager network = new NetworkManager(executor, 100);
-		
-		Multiplexer mux = new Multiplexer(executor, network.getData());
-		
-		Stream status = new Stream();
+
+		rfid.addEvent(b -> {System.out.println("Got message!"); sm.accept("rfid");});
+
 		
 		//Status messages
 		mux.addHandler(bs -> (bs[0] == 0x11), status);
 		
 		//Just handle returns immediately
 		mux.addHandler(bs -> (bs[0] == 0x08), bs -> System.out.println("Got a return!"));
-		
-	    MCP2515 driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);	      
-           
+		      			        
 	    driver.reset().call();    
 	    
-	    //Attach interrupts after reset
-   	 
-	    driver.start();
-	    
-	    //Initialize controller before starting network
+		application.addVertex("RFID", rfid);
+		application.addVertex("CAN driver", driver, "network manager");
+		application.addVertex("network manager", network, "mux");
+		application.addVertex("mux", mux, "abrs");	
+		application.addVertex("abrs", abrs);
+		
+		application.start();
 	    
 	    driver.initialize().call();	    
-	        
-	    network.start();    
+		  
+		  //Portion this out into things when the button is pressed...
+		  
+		  //outToServer.writeBytes(sentence);
+		  
+		//#################################################################
+   
 	    
-	    mux.start();	    
-	    
-	    //Attempt to clear out buffers.  Completely arbitrary
-	    
-	    //TODO: Can get the network queue then try to grab messages?
-//        print(network.receive(1000));
-//        print(network.receive(1000));      
+	    //Attempt to clear out buffers? 
         
         try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-
-		StateMachine<String> system = new StateMachine<String>();
 		
-		Process<String, String> ack = new Process<String, String>("ack", str -> {//System.out.println("acking!"); 
-																				 network.submitWrite(driver.getStatus()); 
-																				 return "rts";});
+		Process<String, String> init = new Process<String, String>("init", Main::init);
+		Auto<String> getStatus = new Auto<String>("get-status", Main::getStatus);
+		Auto<String> unlock = new Auto<String>("unlock", Main::unlock);
 		
-		Auto<String> rts = new Auto<String>("rts", n -> {try {
-																  Thread.sleep(1000);
-															 } catch (Exception e) {																						
-																	e.printStackTrace();
-															 } 
-		                                                     System.out.println("RTS");
-		                                                     network.submitWrite(driver.readyToSend());
-		                                                     
-		                                                     Byte[] b = status.receive(1000);
-		                                                     print(b);
-		                                                     System.out.println(b[1]);
-		                                                     if(b[1] != 0) {
-		                                                    	 network.submitWrite(driver.unlock());
-		                                                     } else {
-		                                                    	 System.out.println("No bike!");
-		                                                     }
-															 return "sleep";});
+		sm.addState(init)
+			.addState(getStatus)
+			.addState(unlock);
 		
-		Auto<String> sleep = new Auto<String>("sleep", n -> {try {
-																	Thread.sleep(1000);
-															} catch (Exception e) {																						
-																	e.printStackTrace();
-															} 
-															return "ack";});
-		
-		system.addState(ack)
-			.addState(sleep)
-			.addState(rts);
-		
-		system.setInitialState("ack");
+		sm.setInitialState("init");
 		
 		//TODO: Ewwwww.  Only for a test!
 		
-		Scanner s = new Scanner(System.in);
-		
-		while(true) {
-			s.next();
-			system.accept("arg");
-		}
 	}
 }

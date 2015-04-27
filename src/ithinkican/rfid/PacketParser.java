@@ -31,7 +31,7 @@ public class PacketParser {
 		case PARTIAL:
 			
 			if(buffer.position() < length - 1) {
-				//Haven't received the whole message yet.  Don't chane the state from PARTIAL
+				//Haven't received the whole message yet.  Don't change the state from PARTIAL
 				buffer.put(b);
 			} else {
 				//Buffer's length is 16 or greater... 	
