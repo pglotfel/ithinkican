@@ -13,7 +13,7 @@ import jssc.SerialPortException;
 public class Reader implements Component{
 	
 	private SerialPort port;
-	private final LinkedBlockingQueue<Event> events = new LinkedBlockingQueue<Event>();
+	private final LinkedBlockingQueue<ReaderEvent> events = new LinkedBlockingQueue<ReaderEvent>();
 	private final PacketParser parser = new PacketParser();
 	private int inputSize;
 	
@@ -68,12 +68,12 @@ public class Reader implements Component{
 		}
 	}
 	
-	public void addEvent(Event e) {
+	public void addEvent(ReaderEvent e) {
 		events.add(e);
 	}
 	
 	public void handle(byte[] b) {			
-		for(Event e : events) {
+		for(ReaderEvent e : events) {
 			e.call(b);
 		}	
 	}

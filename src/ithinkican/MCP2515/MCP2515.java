@@ -3,7 +3,7 @@ package ithinkican.MCP2515;
 import ithinkican.driver.IDriver;
 import ithinkican.driver.SPIChannel;
 import ithinkican.driver.SPIMode;
-import ithinkican.network.Event;
+import ithinkican.network.NetworkFunction;
 import ithinkican.network.NetworkManager;
 import ithinkican.util.Component;
 
@@ -160,9 +160,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 	
 	@Override
-	public Event ack() {
+	public NetworkFunction ack() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -180,9 +180,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event getStatus() {
+	public NetworkFunction getStatus() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 			
 			@Override
 			public void call() {
@@ -199,9 +199,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event unlock() {
+	public NetworkFunction unlock() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -221,9 +221,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event lock() {
+	public NetworkFunction lock() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -241,9 +241,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event enable() {
+	public NetworkFunction enable() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 			
 			
 
@@ -265,9 +265,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event disable() {
+	public NetworkFunction disable() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -287,9 +287,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event getBikeID() {
+	public NetworkFunction getBikeID() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -310,9 +310,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event initialize() {
+	public NetworkFunction initialize() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -333,9 +333,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event reset() {
+	public NetworkFunction reset() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -354,9 +354,9 @@ public class MCP2515 implements IDriver, Component {
 	}
 
 	@Override
-	public Event readyToSend() {
+	public NetworkFunction readyToSend() {
 		
-		return new Event() {
+		return new NetworkFunction() {
 
 			@Override
 			public void call() {

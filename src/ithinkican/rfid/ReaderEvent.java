@@ -1,6 +1,6 @@
 package ithinkican.rfid;
 
 @FunctionalInterface
-public interface Event {
+public interface ReaderEvent {
 	public void call(byte[] b);
 }

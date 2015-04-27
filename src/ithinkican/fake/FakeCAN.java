@@ -1,7 +1,7 @@
 package ithinkican.fake;
 
 import ithinkican.driver.IDriver;
-import ithinkican.network.Event;
+import ithinkican.network.NetworkFunction;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -21,11 +21,11 @@ public class FakeCAN implements IDriver {
 	}
 
 	@Override
-	public Event ack() {
+	public NetworkFunction ack() {
 		return null;}
 
 	@Override
-	public Event getStatus() {
+	public NetworkFunction getStatus() {
 
 		byte[] response = {0x01, 0x01, 0x01, 0x01};
 		
@@ -38,24 +38,24 @@ public class FakeCAN implements IDriver {
 	}
 
 	@Override
-	public Event unlock() {
+	public NetworkFunction unlock() {
 		return null;
 		}
 
 	@Override
-	public Event lock() {
+	public NetworkFunction lock() {
 		return null;}
 
 	@Override
-	public Event enable() {
+	public NetworkFunction enable() {
 		return null;}
 
 	@Override
-	public Event disable() {
+	public NetworkFunction disable() {
 		return null;}
 
 	@Override
-	public Event getBikeID() {
+	public NetworkFunction getBikeID() {
 		
 		byte[] response = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
 		
@@ -68,21 +68,21 @@ public class FakeCAN implements IDriver {
 	}
 
 	@Override
-	public Event reset() {
+	public NetworkFunction reset() {
 		return null;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Event readyToSend() {
+	public NetworkFunction readyToSend() {
 		return null;
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public Event initialize() {
+	public NetworkFunction initialize() {
 		// TODO Auto-generated method stub
 		return null;
 	}

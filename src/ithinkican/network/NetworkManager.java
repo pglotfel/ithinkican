@@ -22,8 +22,8 @@ import java.util.function.Supplier;
 public class NetworkManager implements Component{
 	
 	private LinkedBlockingQueue<Byte[]> data; //Houses data from the network	
-	private LinkedBlockingQueue<Event> writeTasks; 
-	private LinkedBlockingQueue<Event> tasks; //Houses tasks that are to be deployed onto the network.  These can be reads or writes, because they must mutually exclusively access the network.
+	private LinkedBlockingQueue<NetworkFunction> writeTasks; 
+	private LinkedBlockingQueue<NetworkFunction> tasks; //Houses tasks that are to be deployed onto the network.  These can be reads or writes, because they must mutually exclusively access the network.
 	
 	private ScheduledExecutorService executor;
 	private int period = 100;
@@ -33,7 +33,7 @@ public class NetworkManager implements Component{
 		@Override
 		public void run() {
 			
-			Event e = writeTasks.poll();
+			NetworkFunction e = writeTasks.poll();
 			
 			if(e != null) {
 				//System.out.println("Adding write command...");
@@ -65,8 +65,8 @@ public class NetworkManager implements Component{
 	public NetworkManager(ScheduledExecutorService executor, int period) {
 		
 		data = new LinkedBlockingQueue<Byte[]>();
-		writeTasks = new LinkedBlockingQueue<Event>();
-		tasks = new LinkedBlockingQueue<Event>();
+		writeTasks = new LinkedBlockingQueue<NetworkFunction>();
+		tasks = new LinkedBlockingQueue<NetworkFunction>();
 		futures = new Vector<Future<?>>();
 		this.executor = executor;
 		this.period = period;
@@ -93,7 +93,7 @@ public class NetworkManager implements Component{
 	 * @param event The event which will be submitted as a write event.  Write events are executed periodically
 	 * @return
 	 */
-	public boolean submitWrite(Event event) {
+	public boolean submitWrite(NetworkFunction event) {
 		return writeTasks.add(event);
 	}
 	
@@ -106,7 +106,7 @@ public class NetworkManager implements Component{
 	 */
 	public boolean submitWrite(Supplier<Byte[]> supplier, CompletableFuture<Byte[]> future) {
 		
-		Event e = new Event() {
+		NetworkFunction e = new NetworkFunction() {
 
 			@Override
 			public void call() {
@@ -126,7 +126,7 @@ public class NetworkManager implements Component{
 	 */
 	public boolean submitRead(Supplier<Byte[]> supplier) {
 		
-		Event e = new Event() {
+		NetworkFunction e = new NetworkFunction() {
 
 			@Override
 			public void call() {

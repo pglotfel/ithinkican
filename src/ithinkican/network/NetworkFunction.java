@@ -7,6 +7,6 @@ package ithinkican.network;
  *
  */
 @FunctionalInterface
-public interface Event {
+public interface NetworkFunction {
 	public void call();
 }

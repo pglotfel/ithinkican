@@ -1,6 +1,6 @@
 package ithinkican.driver;
 
-import ithinkican.network.Event;
+import ithinkican.network.NetworkFunction;
 
 /**
  * The interface for the CAN driver.  Contains all methods required to successfully handle all ABRS requirements.
@@ -12,14 +12,14 @@ public interface IDriver {
 
 	//Messages that can be sent
 	
-	public Event ack();
-	public Event getStatus();
-	public Event unlock();
-	public Event lock();
-	public Event enable();
-	public Event disable();
-	public Event getBikeID();
-	public Event initialize();
-	public Event reset();
-	public Event readyToSend();
+	public NetworkFunction ack();
+	public NetworkFunction getStatus();
+	public NetworkFunction unlock();
+	public NetworkFunction lock();
+	public NetworkFunction enable();
+	public NetworkFunction disable();
+	public NetworkFunction getBikeID();
+	public NetworkFunction initialize();
+	public NetworkFunction reset();
+	public NetworkFunction readyToSend();
 }
