@@ -22,10 +22,12 @@ public class ConcurrentStateMachine<T> implements Consumer<T>, Component {
 		@Override
 		public void run() {
 			
-			try {
-				advance(queue.take());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			while(true) {
+				try {
+					advance(queue.take());
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}		
 	};
@@ -72,7 +74,7 @@ public class ConcurrentStateMachine<T> implements Consumer<T>, Component {
 			result = states.get(result.apply(null));
 		}
 		
-		//Clear any inpue (i.e., prevent button mashing)
+		//Clear any input (i.e., prevent button mashing)
 		queue.clear();
 		
 		currentState = result;

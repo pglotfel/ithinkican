@@ -33,12 +33,26 @@ public class NetworkManager implements Component{
 		@Override
 		public void run() {
 			
-			NetworkFunction e = writeTasks.poll();
-			
-			if(e != null) {
-				//System.out.println("Adding write command...");
-				tasks.add(e);
-			}	
+			while(true) {
+				
+				NetworkFunction function = null;
+				
+				try {
+					function = writeTasks.take();
+				} catch (InterruptedException e2) {
+					e2.printStackTrace();
+				}
+				
+				if(function != null) {
+					tasks.add(function);
+				}	
+				
+				try {
+					Thread.sleep(period);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}		
 	};
 	
@@ -48,7 +62,6 @@ public class NetworkManager implements Component{
 		public Void call() throws Exception {
 			
 			while(true) {						
-				//System.out.println("Executing command...");
 				tasks.take().call();
 			}
 		}		
@@ -76,7 +89,7 @@ public class NetworkManager implements Component{
 	public void start() {
 		
 		futures.add(executor.schedule(executeTasks, 0, TimeUnit.MILLISECONDS));
-		futures.add(executor.scheduleAtFixedRate(addWrites, 0, period, TimeUnit.MILLISECONDS));
+		futures.add(executor.schedule(addWrites, 0, TimeUnit.MILLISECONDS));
 	}
 	
 	@Override

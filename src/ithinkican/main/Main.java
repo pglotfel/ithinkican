@@ -28,7 +28,7 @@ public class Main implements Component {
 	private final static ConcurrentStateMachine<String> sm = new ConcurrentStateMachine<String>(executor);
 	private final static Reader rfid = new Reader("/dev/ttyUSB0");
 	
-	private final static NetworkManager network = new NetworkManager(executor, 100);
+	private final static NetworkManager network = new NetworkManager(executor, 400);
 	
 	private final static Stream status = new Stream();
 	private final static Multiplexer mux = new Multiplexer(executor, network.getData());
@@ -38,9 +38,7 @@ public class Main implements Component {
 	private Future<?> future;
 	
 	private static void task() {
-		while(true) {
-			network.submitWrite(driver.readyToSend());
-		}
+		network.submitWrite(driver.readyToSend());
 	}
 	
 	public Main() throws IOException {
@@ -49,7 +47,7 @@ public class Main implements Component {
 	
 	@Override 
 	public void start() {
-		future = executor.scheduleAtFixedRate(Main::task, 0, 100, TimeUnit.MILLISECONDS);
+		future = executor.scheduleAtFixedRate(Main::task, 0, 1500, TimeUnit.MILLISECONDS);
 	}
 	
 	@Override 
@@ -91,20 +89,23 @@ public class Main implements Component {
 	public static String getStatus(Void n) {
 		
 		System.out.println("getting status...");
+		
+		network.submitWrite(driver.getStatus());
+		network.submitWrite(driver.readyToSend());
+		
+        Byte[] b = status.receive(5000);
        
-       Byte[] b = status.receive(1000);
-       
-       print(b);
+        print(b);
              
-       if(b != null) {
-	       if(b[1] != 0) {
-	    	   return "unlock";
-	       } else {
-	    	   return "init";
-	       }      
-       } else {
-    	   return "init";
-       }
+	    if(b != null) {
+	        if(b[1] != 0) {
+	    	    return "unlock";
+	        } else {
+	        	return "init";
+	        }      
+	    } else {
+		   return "init";
+	    }
 	}
 	
 	public static String unlock(Object n) {
@@ -131,9 +132,6 @@ public class Main implements Component {
 		} catch (IOException e) {
 			System.err.println("Couldn't connect to TCP server...");
 		}
-
-		rfid.addEvent(b -> {System.out.println("Got message!"); sm.accept("rfid");});
-
 		
 		//Status messages
 		mux.addHandler(bs -> (bs[0] == 0x11), status);
@@ -143,7 +141,8 @@ public class Main implements Component {
 		      			        
 	    driver.reset().call();    
 	    
-		application.addVertex("RFID", rfid);
+		application.addVertex("RFID", rfid, "State Machine");
+		application.addVertex("State Machine", sm);
 		application.addVertex("CAN driver", driver, "network manager");
 		application.addVertex("network manager", network, "mux");
 		application.addVertex("mux", mux, "abrs");	
@@ -177,6 +176,8 @@ public class Main implements Component {
 			.addState(unlock);
 		
 		sm.setInitialState("init");
+		
+		rfid.addEvent(b -> {System.out.println("Got message!"); sm.accept("rfid");});
 		
 		//TODO: Ewwwww.  Only for a test!
 		

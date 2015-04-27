@@ -97,6 +97,7 @@ public class SystemGraph implements Component {
 	@Override
 	public void start() {
 		
+		System.out.print("Component starting order: ");
 		for(Vertex n : this.topologicalSort()) {
 			System.out.print(n.identifier() + " ");
 			n.component().start();
