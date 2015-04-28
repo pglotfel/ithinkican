@@ -35,6 +35,9 @@ public class Main implements Component {
 	
 	private static MCP2515 driver;
 	
+	private static Socket clientSocket;
+	private static DataOutputStream outToServer;
+	
 	private Future<?> future;
 	
 	private static void task() {
@@ -42,6 +45,8 @@ public class Main implements Component {
 	}
 	
 	public Main() throws IOException {
+		clientSocket = new Socket("localhost", 8081);
+		outToServer = new DataOutputStream(clientSocket.getOutputStream());
 		driver = new MCP2515(network, SPIChannel.CE0, SPIMode.MODE0, 10000000);	
 	}
 	
@@ -86,9 +91,24 @@ public class Main implements Component {
 		return ret;
 	}
 	
+	public static String clear(Void n) {
+		try {
+			outToServer.writeBytes("default;");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return "init";
+	}
+	
 	public static String getStatus(Void n) {
 		
 		System.out.println("getting status...");
+		try {
+			outToServer.writeBytes("loading;");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		network.submitWrite(driver.getStatus());
 		
@@ -100,10 +120,10 @@ public class Main implements Component {
 	        if(b[1] != 0) {
 	    	    return "unlock";
 	        } else {
-	        	return "init";
+	        	return "clear";
 	        }      
-	    } else {
-		   return "init";
+	    } else {		
+		   return "clear";
 	    }
 	}
 	
@@ -111,7 +131,19 @@ public class Main implements Component {
 		
 		System.out.println("unlocking!");
 		
+		try {
+			outToServer.writeBytes("bike0;");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		network.submitWrite(driver.unlock());
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
      	 
 		return "init";
 	}
@@ -125,12 +157,12 @@ public class Main implements Component {
 		
 		Main abrs = new Main();
 		
-		try {
-			Socket clientSocket = new Socket("localhost", 8081);
-			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-		} catch (IOException e) {
-			System.err.println("Couldn't connect to TCP server...");
-		}
+//		try {
+//			Socket clientSocket = new Socket("localhost", 8081);
+//			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+//		} catch (IOException e) {
+//			System.err.println("Couldn't connect to TCP server...");
+//		}
 		
 		//Status messages
 		mux.addHandler(bs -> (bs[0] == 0x11), status);
@@ -169,10 +201,12 @@ public class Main implements Component {
 		Process<String, String> init = new Process<String, String>("init", Main::init);
 		Auto<String> getStatus = new Auto<String>("get-status", Main::getStatus);
 		Auto<String> unlock = new Auto<String>("unlock", Main::unlock);
+		Auto<String> clear = new Auto<String>("clear", Main::clear);
 		
 		sm.addState(init)
 			.addState(getStatus)
-			.addState(unlock);
+			.addState(unlock)
+			.addState(clear);
 		
 		sm.setInitialState("init");
 		
