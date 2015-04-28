@@ -91,7 +91,6 @@ public class Main implements Component {
 		System.out.println("getting status...");
 		
 		network.submitWrite(driver.getStatus());
-		network.submitWrite(driver.readyToSend());
 		
         Byte[] b = status.receive(5000);
        
