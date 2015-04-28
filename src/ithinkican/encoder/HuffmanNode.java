@@ -1,5 +1,12 @@
 package ithinkican.encoder;
 
+/**
+ * <p> A node for a Huffman tree.  
+ * 
+ * 
+ * @author Paul G.
+ *
+ */
 public class HuffmanNode {
 	
 	private double probability; 
@@ -10,6 +17,12 @@ public class HuffmanNode {
 	private HuffmanNode left = null; 
 	private HuffmanNode right = null;
 	
+	/**
+	 *  <p> A node for a Huffman tree.  Not really useful outside of the context of the HuffmanCoder.
+	 * 
+	 * @param identifier The idenfifier (code) for the node.
+	 * @param probability The probability associated with the node.  Should be 0 -> 1.
+	 */
 	public HuffmanNode(String identifier, double probability) {
 		this.identifier = identifier;
 		this.probability = probability;

@@ -1,34 +1,39 @@
 package ithinkican.encoder;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
+/**
+ * A coder that takes a series of nodes and transforms them into a Huffman code.  As of now, it only stores codes for the original nodes.  This class is intended to generate identifiers for packets.
+ * 
+ * @author Paul G.
+ *
+ */
 public class HuffmanCoder {
 	
-	private final HashMap<String, String> codes = new HashMap<String, String>();
+	private final HashMap<String, String> codebook = new HashMap<String, String>();
 	private final HuffmanNode[] nodes;
 
-	
+	/**
+	 * 
+	 * @param nodes The sequence of nodes that will be encoded.
+	 */
 	public HuffmanCoder(HuffmanNode...nodes) {
 		
 		this.nodes = new HuffmanNode[nodes.length];
 		
 		for(int i = 0; i < nodes.length; i++) {
 			this.nodes[i] = nodes[i];
-			codes.put(nodes[i].getIdentifier(), "");
+			codebook.put(nodes[i].getIdentifier(), "");
 		}
 	}
 	
-	public void print(HuffmanNode root) {
-		
-		if(root != null) {
-			System.out.println(root.getIdentifier());
-			print(root.getLeft());
-			print(root.getRight());
-		}
-	}
-	
+	/**
+	 * <p> Recursively assigns a binary value (i.e., 1 or 0) to each Huffman node.  Always assigns 0 to left nodes and 1 to right nodes.
+	 * 
+	 * @param root The node that is being processes. 
+	 * @param value The binary value
+	 */
 	private void assignBinaryValue(HuffmanNode root, boolean value) {
 		
 		if(root != null) {
@@ -38,6 +43,13 @@ public class HuffmanCoder {
 		}
 	}
 	
+	/**
+	 * <p> Takes a string and a binary value and adds either 1 or 0 onto the string.
+	 * 
+	 * @param currentValue A string.
+	 * @param binaryValue A boolean (i.e., binary value).
+	 * @return The modified string.
+	 */
 	private String concatValue(String currentValue, boolean binaryValue) {
 		
 		if(binaryValue) {
@@ -47,14 +59,20 @@ public class HuffmanCoder {
 		}
 	}
 	
+	/**
+	 * <p> Recursively adds the encoded values to the codebook.
+	 * 
+	 * @param root The node that is being recursively processed.
+	 * @param currentValue The current binary string.
+	 */
 	private void addCodes(HuffmanNode root, String currentValue) {
 		
 		if(root != null) {
 			
 			String newValue = concatValue(currentValue, root.getBinaryValue());
 			
-			if(codes.get(root.getIdentifier()) != null) {
-				codes.put(root.getIdentifier(), newValue);
+			if(codebook.get(root.getIdentifier()) != null) {
+				codebook.put(root.getIdentifier(), newValue);
 			}
 			
 			addCodes(root.getLeft(), newValue);
@@ -62,6 +80,12 @@ public class HuffmanCoder {
 		}
 	}
 	
+	/**
+	 * <p> Returns the decimal value of a binary string.
+	 *  
+	 * @param binaryValue A binary value as a string.
+	 * @return The decimal value of the binary valued string.
+	 */
 	private static int decimalValue(String binaryValue) {
 
 		int ret = 0;
@@ -77,6 +101,45 @@ public class HuffmanCoder {
 		return ret;
 	}
 	
+	/**
+	 * <p> Finds the node with the minimum probability.
+	 * 
+	 * @param nodes The current nodes.
+	 * @return The minimum node.
+	 */
+	private HuffmanNode findMinProbability(ArrayList<HuffmanNode> nodes) {
+		
+		HuffmanNode min = new HuffmanNode("", 2); 
+		
+		for(HuffmanNode h : nodes) {
+			if(h.getProbability() < min.getProbability()) {
+				min = h;
+			}
+		}
+		
+		return min;
+	}
+	
+	/**
+	 * <p> Combines two nodes into one parent node that has the 'left' and 'right' nodes as children.
+	 * 
+	 * @param left The left child of the resulting parent node.
+	 * @param right The right child of the resulting parent node.
+	 * @return The new parent node.
+	 */
+	private HuffmanNode combine(HuffmanNode left, HuffmanNode right) {
+		
+		HuffmanNode parent = new HuffmanNode(left.getIdentifier() + right.getIdentifier(), left.getProbability() + right.getProbability());
+		parent.setLeft(left);
+		parent.setRight(right);
+		return parent;
+	}
+	
+	/**
+	 * <p> Generates the Huffman code for the given nodes.
+	 * 
+	 * @return The generated codebook.
+	 */
 	public HashMap<String, String> generate() {
 		
 		ArrayList<HuffmanNode> todo = new ArrayList<HuffmanNode>();
@@ -100,39 +163,10 @@ public class HuffmanCoder {
 		
 		addCodes(root, "");
 		
-		for(String s : codes.keySet()) {
-			System.out.println("Identifier: " + s + " Binary Value: " + codes.get(s) + " Hex Value: " + Integer.toHexString(decimalValue(codes.get(s))).toUpperCase());
+		for(String s : codebook.keySet()) {
+			System.out.println("Identifier: " + s + " Binary Value: " + codebook.get(s) + " Hex Value: " + Integer.toHexString(decimalValue(codebook.get(s))).toUpperCase());
 		}
 		
-		return codes;
-	}
-	
-	private HuffmanNode findMinProbability(ArrayList<HuffmanNode> nodes) {
-		
-		HuffmanNode min = new HuffmanNode("", 2); 
-		
-		for(HuffmanNode h : nodes) {
-			if(h.getProbability() < min.getProbability()) {
-				min = h;
-			}
-		}
-		
-		return min;
-	}
-	
-	public HuffmanNode combine(HuffmanNode left, HuffmanNode right) {
-		
-		HuffmanNode parent = new HuffmanNode(left.getIdentifier() + right.getIdentifier(), left.getProbability() + right.getProbability());
-		parent.setLeft(left);
-		parent.setRight(right);
-		return parent;
-	}
-	
-	public static void main(String[] args) {
-		
-		HuffmanCoder c = new HuffmanCoder(new HuffmanNode("A", 0.4), new HuffmanNode("B", 0.4), new HuffmanNode("C", 0.1), new HuffmanNode("D", 0.1));
-		
-		c.generate();
-		
+		return codebook;
 	}
 }
