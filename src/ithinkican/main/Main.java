@@ -173,7 +173,7 @@ public class Main implements Component {
 	    driver.reset().call();    
 	    
 		application.addVertex("RFID", rfid, "State Machine");
-		application.addVertex("State Machine", sm);
+		application.addVertex("State Machine", sm, "abrs");
 		application.addVertex("CAN driver", driver, "network manager");
 		application.addVertex("network manager", network, "mux");
 		application.addVertex("mux", mux, "abrs");	
